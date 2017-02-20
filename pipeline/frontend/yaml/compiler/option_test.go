@@ -1,0 +1,183 @@
+package compiler
+
+import (
+	"os"
+	"reflect"
+	"testing"
+
+	"github.com/cncd/pipeline/pipeline/frontend"
+)
+
+func TestWithWorkspace(t *testing.T) {
+	compiler := New(
+		WithWorkspace(
+			"/pipeline",
+			"src/github.com/octocat/hello-world",
+		),
+	)
+	if compiler.base != "/pipeline" {
+		t.Errorf("WithWorkspace must set the base directory")
+	}
+	if compiler.path != "src/github.com/octocat/hello-world" {
+		t.Errorf("WithWorkspace must set the path directory")
+	}
+}
+
+func TestWithEscalated(t *testing.T) {
+	compiler := New(
+		WithEscalated(
+			"docker",
+			"docker-dev",
+		),
+	)
+	if compiler.escalated[0] != "docker" || compiler.escalated[1] != "docker-dev" {
+		t.Errorf("WithEscalated must whitelist privileged images")
+	}
+}
+
+func TestWithVolumes(t *testing.T) {
+	compiler := New(
+		WithVolumes(
+			"/tmp:/tmp",
+			"/foo:/foo",
+		),
+	)
+	if compiler.volumes[0] != "/tmp:/tmp" || compiler.volumes[1] != "/foo:/foo" {
+		t.Errorf("TestWithVolumes must set default volumes")
+	}
+}
+
+func TestWithPrefix(t *testing.T) {
+	if New(WithPrefix("drone_")).prefix != "drone_" {
+		t.Errorf("WithPrefix must set the prefix")
+	}
+}
+
+func TestWithMetadata(t *testing.T) {
+	metadata := frontend.Metadata{
+		Repo: frontend.Repo{
+			Name:    "octocat/hello-world",
+			Private: true,
+			Link:    "https://github.com/octocat/hello-world",
+			Remote:  "https://github.com/octocat/hello-world.git",
+		},
+	}
+	compiler := New(
+		WithMetadata(metadata),
+	)
+	if !reflect.DeepEqual(compiler.metadata, metadata) {
+		t.Errorf("WithMetadata must set compiler the metadata")
+	}
+	if compiler.env["CI_REPO_NAME"] != metadata.Repo.Name {
+		t.Errorf("WithMetadata must set CI_REPO_NAME")
+	}
+	if compiler.env["CI_REPO_LINK"] != metadata.Repo.Link {
+		t.Errorf("WithMetadata must set CI_REPO_LINK")
+	}
+	if compiler.env["CI_REPO_REMOTE"] != metadata.Repo.Remote {
+		t.Errorf("WithMetadata must set CI_REPO_REMOTE")
+	}
+}
+
+func TestWithLocal(t *testing.T) {
+	if New(WithLocal(true)).local == false {
+		t.Errorf("WithLocal true must enable the local flag")
+	}
+	if New(WithLocal(false)).local == true {
+		t.Errorf("WithLocal false must disable the local flag")
+	}
+}
+
+func TestWithNetrc(t *testing.T) {
+	compiler := New(
+		WithNetrc(
+			"octocat",
+			"password",
+			"github.com",
+		),
+	)
+	if compiler.env["CI_NETRC_USERNAME"] != "octocat" {
+		t.Errorf("WithNetrc should set CI_NETRC_USERNAME")
+	}
+	if compiler.env["CI_NETRC_PASSWORD"] != "password" {
+		t.Errorf("WithNetrc should set CI_NETRC_PASSWORD")
+	}
+	if compiler.env["CI_NETRC_MACHINE"] != "github.com" {
+		t.Errorf("WithNetrc should set CI_NETRC_MACHINE")
+	}
+}
+
+func TestWithProxy(t *testing.T) {
+	// do not execute the test if the host machine sets http proxy
+	// environment variables to avoid interference with other tests.
+	if noProxy != "" || httpProxy != "" || httpsProxy != "" {
+		t.SkipNow()
+		return
+	}
+
+	// alter the default values
+	noProxy = "foo.com"
+	httpProxy = "bar.com"
+	httpsProxy = "baz.com"
+
+	// reset the default values
+	defer func() {
+		noProxy = ""
+		httpProxy = ""
+		httpsProxy = ""
+	}()
+
+	testdata := map[string]string{
+		"no_proxy":    noProxy,
+		"NO_PROXY":    noProxy,
+		"http_proxy":  httpProxy,
+		"HTTP_PROXY":  httpProxy,
+		"https_proxy": httpsProxy,
+		"HTTPS_PROXY": httpsProxy,
+	}
+	compiler := New(
+		WithProxy(),
+	)
+	for key, value := range testdata {
+		if compiler.env[key] != value {
+			t.Errorf("WithProxy should set %s=%s", key, value)
+		}
+	}
+}
+
+func TestWithEnviron(t *testing.T) {
+	compiler := New(
+		WithEnviron(
+			map[string]string{
+				"RACK_ENV": "development",
+				"SHOW":     "true",
+			},
+		),
+	)
+	if compiler.env["RACK_ENV"] != "development" {
+		t.Errorf("WithEnviron should set RACK_ENV")
+	}
+	if compiler.env["SHOW"] != "true" {
+		t.Errorf("WithEnviron should set SHOW")
+	}
+}
+
+func TestGetenv(t *testing.T) {
+	defer func() {
+		os.Unsetenv("X_TEST_FOO")
+		os.Unsetenv("x_test_bar")
+		os.Unsetenv("x_test_baz")
+	}()
+	os.Setenv("X_TEST_FOO", "foo")
+	os.Setenv("x_test_bar", "bar")
+	os.Setenv("x_test_baz", "")
+	if getenv("x_test_foo") != "foo" {
+		t.Errorf("Expect X_TEST_FOO=foo")
+	}
+	if getenv("X_TEST_BAR") != "bar" {
+		t.Errorf("Expect x_test_bar=bar")
+	}
+	if getenv("x_test_baz") != "" {
+		t.Errorf("Expect x_test_bar=bar is empty")
+	}
+}
