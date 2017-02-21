@@ -40,6 +40,7 @@ func (c *Constraints) Match(metadata frontend.Metadata) bool {
 		c.Environment.Match(metadata.Curr.Target) &&
 		c.Event.Match(metadata.Curr.Event) &&
 		c.Branch.Match(metadata.Curr.Commit.Branch) &&
+		c.Repo.Match(metadata.Repo.Name) &&
 		c.Matrix.Match(metadata.Job.Matrix)
 }
 

@@ -3,6 +3,8 @@ package yaml
 import (
 	"testing"
 
+	"github.com/cncd/pipeline/pipeline/frontend"
+
 	"gopkg.in/yaml.v2"
 )
 
@@ -262,6 +264,78 @@ func TestConstraintMap(t *testing.T) {
 			t.Errorf("Expect %q matches %q is %v", test.with, test.conf, want)
 		}
 	}
+}
+
+func TestConstraints(t *testing.T) {
+	testdata := []struct {
+		conf string
+		with frontend.Metadata
+		want bool
+	}{
+		// no constraints, must match
+		{
+			conf: "",
+			with: frontend.Metadata{},
+			want: true,
+		},
+		// branch constraint
+		{
+			conf: "{ branch: develop }",
+			with: frontend.Metadata{Curr: frontend.Build{Commit: frontend.Commit{Branch: "master"}}},
+			want: false,
+		},
+		{
+			conf: "{ branch: master }",
+			with: frontend.Metadata{Curr: frontend.Build{Commit: frontend.Commit{Branch: "master"}}},
+			want: true,
+		},
+		// environment constraint
+		// {
+		// 	conf: "{ branch: develop }",
+		// 	with: frontend.Metadata{Curr: frontend.Build{Commit: frontend.Commit{Branch: "master"}}},
+		// 	want: false,
+		// },
+		// {
+		// 	conf: "{ branch: master }",
+		// 	with: frontend.Metadata{Curr: frontend.Build{Commit: frontend.Commit{Branch: "master"}}},
+		// 	want: true,
+		// },
+		// repo constraint
+		{
+			conf: "{ repo: drone/* }",
+			with: frontend.Metadata{Repo: frontend.Repo{Name: "drone/drone"}},
+			want: true,
+		},
+		{
+			conf: "{ repo: octocat/* }",
+			with: frontend.Metadata{Repo: frontend.Repo{Name: "drone/drone"}},
+			want: false,
+		},
+		// platform constraint
+		{
+			conf: "{ platform: linux/amd64 }",
+			with: frontend.Metadata{Sys: frontend.System{Arch: "linux/amd64"}},
+			want: true,
+		},
+		{
+			conf: "{ repo: linux/amd64 }",
+			with: frontend.Metadata{Sys: frontend.System{Arch: "windows/amd64"}},
+			want: false,
+		},
+	}
+	for _, test := range testdata {
+		c := parseConstraints(test.conf)
+		got, want := c.Match(test.with), test.want
+		if got != want {
+			t.Errorf("Expect %+v matches %q is %v", test.with, test.conf, want)
+		}
+	}
+}
+
+func parseConstraints(s string) *Constraints {
+	c := &Constraints{}
+	yaml.Unmarshal([]byte(s), c)
+	return c
 }
 
 func parseConstraint(s string) *Constraint {
