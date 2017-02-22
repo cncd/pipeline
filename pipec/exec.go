@@ -56,7 +56,7 @@ func executeAction(c *cli.Context) (err error) {
 
 	engine, err := docker.NewEnv()
 	if err != nil {
-		return nil
+		return err
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), c.Duration("timeout"))
@@ -78,7 +78,6 @@ var defaultLogger = pipeline.LogFunc(func(proc *backend.Step, rc multipart.Reade
 	}
 	io.Copy(os.Stderr, part)
 	return nil
-	// return rc.Close()
 })
 
 var defaultTracer = pipeline.TraceFunc(func(state *pipeline.State) error {

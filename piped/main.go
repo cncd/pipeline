@@ -1,16 +1,20 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"io"
 	"log"
-	"net/http"
+	"math"
 	"net/url"
 	"os"
 	"strconv"
 	"time"
 
+	"github.com/cncd/pipeline/pipeline"
 	"github.com/cncd/pipeline/pipeline/backend"
+	"github.com/cncd/pipeline/pipeline/backend/docker"
+	"github.com/cncd/pipeline/pipeline/multipart"
 	"github.com/cncd/pipeline/pipeline/rpc"
 
 	_ "github.com/joho/godotenv/autoload"
@@ -29,17 +33,18 @@ func main() {
 			Value:  "ws://localhost:9999",
 		},
 		cli.StringFlag{
-			Name:   "username",
-			EnvVar: "PIPED_USERNAME",
-		},
-		cli.StringFlag{
-			Name:   "password",
-			EnvVar: "PIPED_PASSWORD",
+			Name:   "token",
+			EnvVar: "PIPED_TOKEN",
 		},
 		cli.DurationFlag{
-			Name:   "timeout",
-			EnvVar: "PIPED_TIMEOUT",
-			Value:  time.Hour,
+			Name:   "backoff",
+			EnvVar: "PIPED_BACKOFF",
+			Value:  time.Second * 15,
+		},
+		cli.IntFlag{
+			Name:   "retry-limit",
+			EnvVar: "PIPED_RETRY_LIMIT",
+			Value:  math.MaxInt32,
 		},
 		cli.StringFlag{
 			Name:   "platform",
@@ -69,66 +74,135 @@ func start(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	// endpoint.User = url.UserPassword(
-	// 	c.String("username"),
-	// 	c.String("password"),
-	// )
 
-	client, err := rpc.New(endpoint.String())
+	client, err := rpc.NewClient(
+		endpoint.String(),
+		rpc.WithRetryLimit(
+			c.Int("retry-limit"),
+		),
+		rpc.WithBackoff(
+			c.Duration("backoff"),
+		),
+	)
 	if err != nil {
 		return err
 	}
-	if closer, ok := client.(io.Closer); ok {
-		defer closer.Close()
-	}
+	defer client.Close()
 
-	go func() {
-		client.Next(context.Background())
-	}()
-
-	for i := 0; i <= 100; i++ {
-		id := strconv.Itoa(i)
-		log.Printf("line number %s\n", id)
-
-		if err := client.Log(context.Background(), id, "test"); err != nil {
+	for {
+		if err := run(client); err != nil {
 			return err
 		}
-		time.Sleep(5 * time.Second)
+	}
+}
+
+func run(client rpc.Peer) error {
+	log.Println("pipeline: request next execution")
+
+	// get the next job from the queue
+	work, err := client.Next(context.Background())
+	if err != nil {
+		return err
+	}
+	if work == nil {
+		return nil
+	}
+	log.Println("pipeline: received next execution")
+
+	// new docker engine
+	engine, err := docker.NewEnv()
+	if err != nil {
+		return err
+	}
+
+	timeout := time.Hour
+	// if work.Timeout != 0 {
+	// 	timeout = time.Duration(work.Timeout) * time.Minute
+	// }
+
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+	// TODO handle interrupt
+
+	// TODO handle cancel request
+	// go func() {
+	//   client.Notify(c, id)
+	// }()
+
+	log.Println("pipeline: executing")
+
+	state := rpc.State{}
+	state.Started = time.Now().Unix()
+	err = client.Update(context.Background(), work.ID, state)
+	if err != nil {
+		log.Printf("Pipeine: error updating pipeline status: %s", err)
+	}
+
+	defaultLogger := pipeline.LogFunc(func(proc *backend.Step, rc multipart.Reader) error {
+		part, rerr := rc.NextPart()
+		if rerr != nil {
+			return rerr
+		}
+		// buf := bufio.NewReaderSize(part, 1000000)
+		io.Copy(&lineReader{client: client, id: work.ID}, part)
+		return nil
+	})
+
+	err = pipeline.New(work.Config,
+		pipeline.WithContext(ctx),
+		pipeline.WithLogger(defaultLogger),
+		pipeline.WithTracer(defaultTracer),
+		pipeline.WithEngine(engine),
+	).Run()
+
+	state.Finished = time.Now().Unix()
+	state.Exited = true
+	if err != nil {
+		state.Error = err.Error()
+		if xerr, ok := err.(*pipeline.ExitError); ok {
+			state.ExitCode = xerr.Code
+		}
+		if xerr, ok := err.(*pipeline.OomError); ok {
+			state.ExitCode = xerr.Code
+			if state.ExitCode == 0 {
+				state.ExitCode = 1
+			}
+		}
+	}
+
+	log.Println("pipeline: execution complete")
+
+	err = client.Update(context.Background(), work.ID, state)
+	if err != nil {
+		log.Printf("Pipeine: error updating pipeline status: %s", err)
 	}
 
 	return nil
 }
 
-//
-// this code will get removed. here for testing only
-//
-
-func serve(c *cli.Context) error {
-	handler := new(handler)
-	server := rpc.NewServer(handler)
-
-	log.Println("starting server on port :9999")
-	return http.ListenAndServe(":9999", server)
+type lineReader struct {
+	client rpc.Peer
+	line   int
+	id     string
 }
 
-type handler struct {
-}
-
-func (*handler) Next(c context.Context) (*backend.Config, error) {
-	println("BLOCKING FOR NEXT")
-	select {
-	case <-time.After(20 * time.Second):
-		println("GOT NEXT")
-	case <-c.Done():
-		println("CANCEL")
+func (r *lineReader) Write(p []byte) (n int, err error) {
+	parts := bytes.Split(p, []byte{'\n'})
+	for _, part := range parts {
+		r.line++
+		r.client.Log(context.Background(), r.id, string(part))
 	}
-	return nil, nil
+	return len(p), nil
 }
 
-func (*handler) Notify(c context.Context, id string) (bool, error)             { return false, nil }
-func (*handler) Update(c context.Context, id string, state rpc.State) error    { return nil }
-func (*handler) Save(c context.Context, id, mime string, file io.Reader) error { return nil }
-func (*handler) Log(c context.Context, id string, line string) error {
-	log.Printf("got line %s\n", id)
+var defaultTracer = pipeline.TraceFunc(func(state *pipeline.State) error {
+	if !state.Process.Exited {
+		state.Pipeline.Step.Environment["CI_BUILD_STATUS"] = "success"
+		state.Pipeline.Step.Environment["CI_BUILD_STARTED"] = strconv.FormatInt(state.Pipeline.Time, 10)
+		state.Pipeline.Step.Environment["CI_BUILD_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
+		if state.Pipeline.Error != nil {
+			state.Pipeline.Step.Environment["CI_BUILD_STATUS"] = "failure"
+		}
+	}
 	return nil
-}
+})

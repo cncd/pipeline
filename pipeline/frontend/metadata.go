@@ -26,10 +26,12 @@ type (
 		Created  int64
 		Started  int64
 		Finished int64
+		Timeout  int64
 		Status   string
 		Event    string
 		Link     string
 		Target   string
+		Trusted  bool
 
 		Commit Commit
 	}

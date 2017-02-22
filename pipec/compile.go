@@ -10,8 +10,8 @@ import (
 
 	"github.com/cncd/pipeline/pipeline/frontend"
 	"github.com/cncd/pipeline/pipeline/frontend/yaml"
+	"github.com/cncd/pipeline/pipeline/frontend/yaml/compiler"
 
-	json "github.com/ghodss/yaml"
 	"github.com/urfave/cli"
 )
 
@@ -270,34 +270,34 @@ func compileAction(c *cli.Context) (err error) {
 	}
 
 	// compiles the yaml file
-	spec := conf.Compile(
-		yaml.WithEscalated(
-			c.StringSlice("privileged"),
+	compiled := compiler.New(
+		compiler.WithEscalated(
+			c.StringSlice("privileged")...,
 		),
-		yaml.WithVolumes(volumes),
-		yaml.WithWorkspace(
+		compiler.WithVolumes(volumes...),
+		compiler.WithWorkspace(
 			c.String("workspace-base"),
 			c.String("workspace-path"),
 		),
-		yaml.WithPrefix(
+		compiler.WithPrefix(
 			c.String("prefix"),
 		),
-		yaml.WithProxy(),
-		yaml.WithLocal(
+		compiler.WithProxy(),
+		compiler.WithLocal(
 			c.Bool("local"),
 		),
-		yaml.WithNetrc(
+		compiler.WithNetrc(
 			c.String("netrc-username"),
 			c.String("netrc-password"),
 			c.String("netrc-machine"),
 		),
-		yaml.WithMetaData(
+		compiler.WithMetadata(
 			metadataFromContext(c),
 		),
-	)
+	).Compile(conf)
 
 	// marshal the compiled spec to formatted yaml
-	out, err := json.MarshalIndent(spec, "", "  ")
+	out, err := json.MarshalIndent(compiled, "", "  ")
 	if err != nil {
 		return err
 	}

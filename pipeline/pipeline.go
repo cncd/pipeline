@@ -2,6 +2,7 @@ package pipeline
 
 import (
 	"context"
+	"time"
 
 	"golang.org/x/sync/errgroup"
 
@@ -14,6 +15,8 @@ type (
 	State struct {
 		// Global state of the pipeline.
 		Pipeline struct {
+			// Pipeline time started
+			Time int64 `json:"time"`
 			// Current pipeline step
 			Step *backend.Step `json:"step"`
 			// Current pipeline error state
@@ -27,9 +30,10 @@ type (
 
 // Runtime is a configuration runtime.
 type Runtime struct {
-	err    error
-	spec   *backend.Config
-	engine backend.Engine
+	err     error
+	spec    *backend.Config
+	engine  backend.Engine
+	started int64
 
 	ctx    context.Context
 	tracer Tracer
@@ -54,6 +58,7 @@ func (r *Runtime) Run() error {
 		r.engine.Destroy(r.spec)
 	}()
 
+	r.started = time.Now().Unix()
 	if err := r.engine.Setup(r.spec); err != nil {
 		return err
 	}
@@ -108,6 +113,7 @@ func (r *Runtime) exec(proc *backend.Step) error {
 
 	if r.tracer != nil {
 		state := new(State)
+		state.Pipeline.Time = r.started
 		state.Pipeline.Error = r.err
 		state.Pipeline.Step = proc
 		state.Process = new(backend.State) // empty
@@ -145,6 +151,7 @@ func (r *Runtime) exec(proc *backend.Step) error {
 
 	if r.tracer != nil {
 		state := new(State)
+		state.Pipeline.Time = r.started
 		state.Pipeline.Error = r.err
 		state.Pipeline.Step = proc
 		state.Process = wait
