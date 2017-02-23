@@ -11,6 +11,7 @@ import (
 	"github.com/cncd/pipeline/pipeline"
 	"github.com/cncd/pipeline/pipeline/backend"
 	"github.com/cncd/pipeline/pipeline/backend/docker"
+	"github.com/cncd/pipeline/pipeline/interrupt"
 	"github.com/cncd/pipeline/pipeline/multipart"
 	"github.com/urfave/cli"
 )
@@ -61,7 +62,7 @@ func executeAction(c *cli.Context) (err error) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), c.Duration("timeout"))
 	defer cancel()
-	ctx = WithInterrupt(ctx)
+	ctx = interrupt.WithContext(ctx)
 
 	return pipeline.New(config,
 		pipeline.WithContext(ctx),

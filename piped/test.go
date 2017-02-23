@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -67,6 +68,8 @@ func (h *handler) start() {
 				},
 			},
 		}
+		next.Timeout = 60
+		next.ID = strconv.Itoa(i)
 
 		h.queue <- next
 		<-time.After(45 * time.Second)
@@ -84,11 +87,11 @@ func (h *handler) Next(c context.Context) (*rpc.Pipeline, error) {
 
 func (*handler) Notify(c context.Context, id string) (bool, error) { return false, nil }
 func (*handler) Update(c context.Context, id string, state rpc.State) error {
-	log.Printf("got update %s. exited=%v. exit_code=%d\n", id, state.Exited, state.ExitCode)
+	log.Printf("pipeline: update %s: exited=%v, exit_code=%d", id, state.Exited, state.ExitCode)
 	return nil
 }
 func (*handler) Save(c context.Context, id, mime string, file io.Reader) error { return nil }
-func (*handler) Log(c context.Context, id string, line string) error {
-	log.Printf("got line %s: %s\n", id, line)
+func (*handler) Log(c context.Context, id string, line *rpc.Line) error {
+	log.Printf("pipeline: logs %s: %s", id, line)
 	return nil
 }

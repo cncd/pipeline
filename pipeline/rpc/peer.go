@@ -42,7 +42,7 @@ type Peer interface {
 	Update(c context.Context, id string, state State) error
 
 	// Log writes the pipeline log entry.
-	Log(c context.Context, id string, line string) error
+	Log(c context.Context, id string, line *Line) error
 
 	// Save saves the pipeline artifact.
 	Save(c context.Context, id, mime string, file io.Reader) error

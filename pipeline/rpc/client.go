@@ -35,7 +35,7 @@ type (
 
 	logReq struct {
 		ID   string `json:"id"`
-		Line string `json:"line"`
+		Line *Line  `json:"line"`
 	}
 )
 
@@ -90,7 +90,7 @@ func (t *Client) Update(c context.Context, id string, state State) error {
 }
 
 // Log writes the pipeline log entry.
-func (t *Client) Log(c context.Context, id string, line string) error {
+func (t *Client) Log(c context.Context, id string, line *Line) error {
 	params := logReq{id, line}
 	return t.call(methodLog, &params, nil)
 }
