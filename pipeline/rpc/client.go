@@ -72,27 +72,27 @@ func NewClient(endpoint string, opts ...Option) (*Client, error) {
 // Next returns the next pipeline in the queue.
 func (t *Client) Next(c context.Context) (*Pipeline, error) {
 	res := new(Pipeline)
-	err := t.call(methodNext, nil, res)
+	err := t.call(c, methodNext, nil, res)
 	return res, err
 }
 
 // Notify returns true if the pipeline should be cancelled.
 func (t *Client) Notify(c context.Context, id string) (bool, error) {
 	out := false
-	err := t.call(methodNotify, id, &out)
+	err := t.call(c, methodNotify, id, &out)
 	return out, err
 }
 
 // Update updates the pipeline state.
 func (t *Client) Update(c context.Context, id string, state State) error {
 	params := updateReq{id, state}
-	return t.call(methodUpdate, &params, nil)
+	return t.call(c, methodUpdate, &params, nil)
 }
 
 // Log writes the pipeline log entry.
 func (t *Client) Log(c context.Context, id string, line *Line) error {
 	params := logReq{id, line}
-	return t.call(methodLog, &params, nil)
+	return t.call(c, methodLog, &params, nil)
 }
 
 // Save saves the pipeline artifact.
@@ -102,7 +102,7 @@ func (t *Client) Save(c context.Context, id, mime string, file io.Reader) error 
 		return err
 	}
 	params := saveReq{id, mime, data}
-	return t.call(methodSave, params, nil)
+	return t.call(c, methodSave, params, nil)
 }
 
 // Close closes the client connection.
@@ -115,8 +115,8 @@ func (t *Client) Close() error {
 
 // call makes the remote prodedure call. If the call fails due to connectivity
 // issues the connection is re-establish and call re-attempted.
-func (t *Client) call(name string, req, res interface{}) error {
-	if err := t.conn.Call(context.Background(), name, req, res); err == nil {
+func (t *Client) call(ctx context.Context, name string, req, res interface{}) error {
+	if err := t.conn.Call(ctx, name, req, res); err == nil {
 		return nil
 	} else if err != jsonrpc2.ErrClosed && err != io.ErrUnexpectedEOF {
 		return err
@@ -124,7 +124,7 @@ func (t *Client) call(name string, req, res interface{}) error {
 	if err := t.openRetry(); err != nil {
 		return err
 	}
-	return t.conn.Call(context.Background(), name, req, res)
+	return t.conn.Call(ctx, name, req, res)
 }
 
 // openRetry opens the connection and will retry on failure until

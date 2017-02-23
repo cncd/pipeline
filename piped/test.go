@@ -6,6 +6,8 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
 	"strconv"
 	"strings"
 	"time"
@@ -85,7 +87,25 @@ func (h *handler) Next(c context.Context) (*rpc.Pipeline, error) {
 	}
 }
 
-func (*handler) Notify(c context.Context, id string) (bool, error) { return false, nil }
+func (*handler) Notify(c context.Context, id string) (bool, error) {
+
+	sigterm := make(chan os.Signal)
+	signal.Notify(sigterm, os.Interrupt)
+	defer signal.Stop(sigterm)
+
+	select {
+	case <-c.Done():
+		println("pipeline: cancel: interrupt")
+		return false, nil
+	case <-sigterm:
+		println("pipeline: cancel: received")
+		return true, nil
+	case <-time.After(120 * time.Second):
+		println("pipeline: cancel: timeout")
+		return false, nil
+	}
+}
+
 func (*handler) Update(c context.Context, id string, state rpc.State) error {
 	log.Printf("pipeline: update %s: exited=%v, exit_code=%d", id, state.Exited, state.ExitCode)
 	return nil

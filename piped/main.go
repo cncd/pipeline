@@ -133,10 +133,15 @@ func run(ctx context.Context, client rpc.Peer) error {
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
-	// TODO handle cancel request
-	// go func() {
-	//   client.Notify(c, id)
-	// }()
+	go func() {
+		ok, _ := client.Notify(ctx, work.ID)
+		if ok {
+			log.Printf("pipeline: cancel signal received: %s", work.ID)
+			cancel()
+		} else {
+			log.Printf("pipeline: cancel channel closed: %s", work.ID)
+		}
+	}()
 
 	state := rpc.State{}
 	state.Started = time.Now().Unix()
@@ -184,9 +189,9 @@ func run(ctx context.Context, client rpc.Peer) error {
 		}
 		if xerr, ok := err.(*pipeline.OomError); ok {
 			state.ExitCode = xerr.Code
-			if state.ExitCode == 0 {
-				state.ExitCode = 1
-			}
+		}
+		if state.ExitCode == 0 {
+			state.ExitCode = 1
 		}
 	}
 
