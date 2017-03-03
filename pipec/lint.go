@@ -6,6 +6,7 @@ import (
 	"github.com/cncd/pipeline/pipeline/frontend/yaml"
 	"github.com/cncd/pipeline/pipeline/frontend/yaml/linter"
 
+	"github.com/kr/pretty"
 	"github.com/urfave/cli"
 )
 
@@ -16,6 +17,9 @@ var lintCommand = cli.Command{
 	Flags: []cli.Flag{
 		cli.BoolFlag{
 			Name: "trusted",
+		},
+		cli.BoolFlag{
+			Name: "pretty",
 		},
 	},
 }
@@ -39,6 +43,10 @@ func lintAction(c *cli.Context) error {
 
 	if err != nil {
 		return err
+	}
+
+	if c.Bool("pretty") {
+		pretty.Println(conf)
 	}
 
 	fmt.Println("Lint complete. Yaml file is valid")

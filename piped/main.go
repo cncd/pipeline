@@ -29,12 +29,12 @@ func main() {
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
 			Name:   "endpoint",
-			EnvVar: "PIPED_ENDPOINT",
+			EnvVar: "PIPED_ENDPOINT,PIPED_SERVER",
 			Value:  "ws://localhost:9999",
 		},
 		cli.StringFlag{
 			Name:   "token",
-			EnvVar: "PIPED_TOKEN",
+			EnvVar: "PIPED_TOKEN,PIPED_SECRET",
 		},
 		cli.DurationFlag{
 			Name:   "backoff",
@@ -50,15 +50,6 @@ func main() {
 			Name:   "platform",
 			EnvVar: "PIPED_PLATFORM",
 			Value:  "linux/amd64",
-		},
-	}
-
-	// TODO DELETE THIS
-	app.Commands = []cli.Command{
-		cli.Command{
-			Name:   "serve",
-			Usage:  "test server",
-			Action: serve,
 		},
 	}
 
@@ -82,6 +73,9 @@ func start(c *cli.Context) error {
 		),
 		rpc.WithBackoff(
 			c.Duration("backoff"),
+		),
+		rpc.WithToken(
+			c.String("token"),
 		),
 	)
 	if err != nil {
@@ -126,20 +120,35 @@ func run(ctx context.Context, client rpc.Peer) error {
 	}
 
 	timeout := time.Hour
-	if work.Timeout != 0 {
-		timeout = time.Duration(work.Timeout) * time.Minute
+	if minutes := work.Timeout; minutes != 0 {
+		timeout = time.Duration(minutes) * time.Minute
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
+	cancelled := abool.New()
 	go func() {
 		ok, _ := client.Notify(ctx, work.ID)
 		if ok {
+			cancelled.SetTo(true)
 			log.Printf("pipeline: cancel signal received: %s", work.ID)
 			cancel()
 		} else {
 			log.Printf("pipeline: cancel channel closed: %s", work.ID)
+		}
+	}()
+
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				log.Printf("pipeline: cancel ping loop: %s", work.ID)
+				return
+			case <-time.After(time.Minute):
+				log.Printf("pipeline: ping queue: %s", work.ID)
+				client.Extend(ctx, work.ID)
+			}
 		}
 	}()
 
@@ -190,7 +199,9 @@ func run(ctx context.Context, client rpc.Peer) error {
 		if xerr, ok := err.(*pipeline.OomError); ok {
 			state.ExitCode = xerr.Code
 		}
-		if state.ExitCode == 0 {
+		if cancelled.IsSet() {
+			state.ExitCode = 130
+		} else if state.ExitCode == 0 {
 			state.ExitCode = 1
 		}
 	}

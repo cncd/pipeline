@@ -4,7 +4,9 @@ import (
 	"context"
 	"io"
 	"io/ioutil"
+	"log"
 	"math"
+	"net/http"
 	"sync"
 	"time"
 
@@ -16,6 +18,7 @@ import (
 const (
 	methodNext   = "next"
 	methodNotify = "notify"
+	methodExtend = "extend"
 	methodUpdate = "update"
 	methodLog    = "log"
 	methodSave   = "save"
@@ -53,6 +56,7 @@ type Client struct {
 	retry    int
 	backoff  time.Duration
 	endpoint string
+	token    string
 }
 
 // NewClient returns a new Client.
@@ -81,6 +85,11 @@ func (t *Client) Notify(c context.Context, id string) (bool, error) {
 	out := false
 	err := t.call(c, methodNotify, id, &out)
 	return out, err
+}
+
+// Extend extends the pipeline deadline.
+func (t *Client) Extend(c context.Context, id string) error {
+	return t.call(c, methodExtend, id, nil)
 }
 
 // Update updates the pipeline state.
@@ -119,7 +128,10 @@ func (t *Client) call(ctx context.Context, name string, req, res interface{}) er
 	if err := t.conn.Call(ctx, name, req, res); err == nil {
 		return nil
 	} else if err != jsonrpc2.ErrClosed && err != io.ErrUnexpectedEOF {
+		log.Printf("rpc: error making call: %s", err)
 		return err
+	} else {
+		log.Printf("rpc: error making call: connection closed: %s", err)
 	}
 	if err := t.openRetry(); err != nil {
 		return err
@@ -139,6 +151,8 @@ func (t *Client) openRetry() error {
 		if err == io.EOF {
 			return err
 		}
+
+		log.Printf("rpc: error re-connecting: %s", err)
 		<-time.After(t.backoff)
 	}
 	return nil
@@ -152,7 +166,11 @@ func (t *Client) open() error {
 	if t.done {
 		return io.EOF
 	}
-	conn, _, err := websocket.DefaultDialer.Dial(t.endpoint, nil)
+	header := map[string][]string{
+		"Content-Type":  {"application/json-rpc"},
+		"Authorization": {"bearer " + t.token},
+	}
+	conn, _, err := websocket.DefaultDialer.Dial(t.endpoint, http.Header(header))
 	if err != nil {
 		return err
 	}

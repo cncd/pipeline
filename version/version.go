@@ -6,7 +6,7 @@ var (
 	// major is for an API incompatible changes
 	major = 1
 	// minor is for functionality in a backwards-compatible manner
-	minor = 5
+	minor = 0
 	// patch is for backwards-compatible bug fixes
 	patch = 0
 )

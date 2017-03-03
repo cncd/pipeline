@@ -20,3 +20,10 @@ func WithRetryLimit(i int) Option {
 		c.retry = i
 	}
 }
+
+// WithToken configures the client authorization token.
+func WithToken(t string) Option {
+	return func(c *Client) {
+		c.token = t
+	}
+}

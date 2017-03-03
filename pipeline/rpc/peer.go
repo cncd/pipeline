@@ -25,8 +25,9 @@ type (
 	// Pipeline defines the pipeline execution details.
 	Pipeline struct {
 		ID      string          `json:"id"`
-		Timeout int64           `json:"timeout"`
+		State   State           `json:"state"`
 		Config  *backend.Config `json:"config"`
+		Timeout int64           `json:"timeout"`
 	}
 )
 
@@ -36,14 +37,19 @@ type Peer interface {
 	Next(c context.Context) (*Pipeline, error)
 
 	// Notify returns true if the pipeline should be cancelled.
+	// TODO: rename to Done
 	Notify(c context.Context, id string) (bool, error)
+
+	// Extend extends the pipeline deadline
+	Extend(c context.Context, id string) error
 
 	// Update updates the pipeline state.
 	Update(c context.Context, id string, state State) error
 
+	// Save saves the pipeline artifact.
+	// TODO rename to Upload
+	Save(c context.Context, id, mime string, file io.Reader) error
+
 	// Log writes the pipeline log entry.
 	Log(c context.Context, id string, line *Line) error
-
-	// Save saves the pipeline artifact.
-	Save(c context.Context, id, mime string, file io.Reader) error
 }

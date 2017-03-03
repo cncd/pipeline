@@ -14,7 +14,7 @@ func main() {
 	app.Name = "pipec"
 	app.Usage = "pipec provides command line tools for the cncd runtime"
 	app.Commands = []cli.Command{
-		// compileCommand,
+		compileCommand,
 		executeCommand,
 		lintCommand,
 	}
