@@ -77,7 +77,7 @@ var compileCommand = cli.Command{
 		//
 		cli.StringFlag{
 			Name:   "system-arch",
-			Value:  "pipec",
+			Value:  "linux/amd64",
 			EnvVar: "CI_SYSTEM_ARCH",
 		},
 		cli.StringFlag{

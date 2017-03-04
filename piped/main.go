@@ -112,7 +112,9 @@ func run(ctx context.Context, client rpc.Peer) error {
 		return nil
 	}
 	log.Printf("pipeline: received next execution: %s", work.ID)
-
+	if os.Getenv("SUICIDE_MODE") != "" {
+		os.Exit(1)
+	}
 	// new docker engine
 	engine, err := docker.NewEnv()
 	if err != nil {
