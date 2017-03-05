@@ -7,6 +7,7 @@ import (
 	"math"
 	"net/url"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/cncd/pipeline/pipeline"
@@ -131,10 +132,10 @@ func run(ctx context.Context, client rpc.Peer) error {
 
 	cancelled := abool.New()
 	go func() {
-		ok, _ := client.Notify(ctx, work.ID)
-		if ok {
-			cancelled.SetTo(true)
-			log.Printf("pipeline: cancel signal received: %s", work.ID)
+		werr := client.Wait(ctx, work.ID)
+		if werr != nil {
+			cancelled.SetTo(true) // TODO verify error is really an error
+			log.Printf("pipeline: cancel signal received: %s: %s", work.ID, werr)
 			cancel()
 		} else {
 			log.Printf("pipeline: cancel channel closed: %s", work.ID)
@@ -161,16 +162,20 @@ func run(ctx context.Context, client rpc.Peer) error {
 		log.Printf("pipeline: error updating pipeline status: %s: %s", work.ID, err)
 	}
 
+	var uploads sync.WaitGroup
 	defaultLogger := pipeline.LogFunc(func(proc *backend.Step, rc multipart.Reader) error {
 		part, rerr := rc.NextPart()
 		if rerr != nil {
 			return rerr
 		}
+		uploads.Add(1)
+
 		writer := rpc.NewLineWriter(client, work.ID, proc.Name)
 		io.Copy(writer, part)
 
 		defer func() {
 			log.Printf("pipeline: finish uploading logs: %s: step %s", work.ID, proc.Alias)
+			uploads.Done()
 		}()
 
 		part, rerr = rc.NextPart()
@@ -210,9 +215,15 @@ func run(ctx context.Context, client rpc.Peer) error {
 
 	log.Printf("pipeline: execution complete: %s", work.ID)
 
+	uploads.Wait()
 	err = client.Update(context.Background(), work.ID, state)
 	if err != nil {
 		log.Printf("Pipeine: error updating pipeline status: %s: %s", work.ID, err)
+	}
+
+	err = client.Done(context.Background(), work.ID)
+	if err != nil {
+		log.Printf("Pipeine: error signaling pipeline done: %s: %s", work.ID, err)
 	}
 
 	return nil

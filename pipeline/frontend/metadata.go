@@ -5,66 +5,66 @@ import "strconv"
 type (
 	// Metadata defines runtime m.
 	Metadata struct {
-		Repo Repo
-		Curr Build
-		Prev Build
-		Job  Job
-		Sys  System
+		ID   string `json:"id,omitempty"`
+		Repo Repo   `json:"repo,omitempty"`
+		Curr Build  `json:"curr,omitempty"`
+		Prev Build  `json:"prev,omitempty"`
+		Job  Job    `json:"job,omitempty"`
+		Sys  System `json:"sys,omitempty"`
 	}
 
 	// Repo defines runtime metadata for a repository.
 	Repo struct {
-		Name    string
-		Link    string
-		Remote  string
-		Private bool
+		Name    string `json:"name,omitempty"`
+		Link    string `json:"link,omitempty"`
+		Remote  string `json:"remote,omitempty"`
+		Private bool   `json:"private,omitempty"`
 	}
 
 	// Build defines runtime metadata for a build.
 	Build struct {
-		Number   int
-		Created  int64
-		Started  int64
-		Finished int64
-		Timeout  int64
-		Status   string
-		Event    string
-		Link     string
-		Target   string
-		Trusted  bool
-
-		Commit Commit
+		Number   int    `json:"number,omitempty"`
+		Created  int64  `json:"created,omitempty"`
+		Started  int64  `json:"started,omitempty"`
+		Finished int64  `json:"finished,omitempty"`
+		Timeout  int64  `json:"timeout,omitempty"`
+		Status   string `json:"status,omitempty"`
+		Event    string `json:"event,omitempty"`
+		Link     string `json:"link,omitempty"`
+		Target   string `json:"target,omitempty"`
+		Trusted  bool   `json:"trusted,omitempty"`
+		Commit   Commit `json:"commit,omitempty"`
 	}
 
 	// Commit defines runtime metadata for a commit.
 	Commit struct {
-		Sha     string
-		Ref     string
-		Refspec string
-		Branch  string
-		Message string
-		Author  Author
+		Sha     string `json:"sha,omitempty"`
+		Ref     string `json:"ref,omitempty"`
+		Refspec string `json:"refspec,omitempty"`
+		Branch  string `json:"branch,omitempty"`
+		Message string `json:"message,omitempty"`
+		Author  Author `json:"author,omitempty"`
 	}
 
 	// Author defines runtime metadata for a commit author.
 	Author struct {
-		Name   string
-		Email  string
-		Avatar string
+		Name   string `json:"name,omitempty"`
+		Email  string `json:"email,omitempty"`
+		Avatar string `json:"avatar,omitempty"`
 	}
 
 	// Job defines runtime metadata for a job.
 	Job struct {
-		Number int
-		Matrix map[string]string
+		Number int               `json:"number,omitempty"`
+		Matrix map[string]string `json:"matrix,omitempty"`
 	}
 
 	// System defines runtime metadata for a ci/cd system.
 	System struct {
-		Name string
-		Host string
-		Link string
-		Arch string
+		Name string `json:"name,omitempty"`
+		Host string `json:"host,omitempty"`
+		Link string `json:"link,omitempty"`
+		Arch string `json:"arch,omitempty"`
 	}
 )
 
