@@ -1,0 +1,15 @@
+workspace:
+  base: /go
+  path: src/github.com/cncd/pipeline
+
+pipeline:
+  install:
+    image: golang:1.8
+    commands:
+      - go install github.com/cncd/pipeline/pipec
+      - go install github.com/cncd/pipeline/piped
+
+  test:
+    image: golang:1.8
+    commands:
+      - go test -cover github.com/cncd/pipeline/...
