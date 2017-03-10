@@ -75,9 +75,9 @@ func NewClient(endpoint string, opts ...Option) (*Client, error) {
 }
 
 // Next returns the next pipeline in the queue.
-func (t *Client) Next(c context.Context) (*Pipeline, error) {
+func (t *Client) Next(c context.Context, f Filter) (*Pipeline, error) {
 	res := new(Pipeline)
-	err := t.call(c, methodNext, nil, res)
+	err := t.call(c, methodNext, f, res)
 	return res, err
 }
 

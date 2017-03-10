@@ -10,6 +10,7 @@ import (
 
 	"github.com/cncd/pipeline/pipeline"
 	"github.com/cncd/pipeline/pipeline/backend"
+	"github.com/cncd/pipeline/pipeline/backend/Kubernetes"
 	"github.com/cncd/pipeline/pipeline/backend/docker"
 	"github.com/cncd/pipeline/pipeline/interrupt"
 	"github.com/cncd/pipeline/pipeline/multipart"
@@ -29,6 +30,23 @@ var executeCommand = cli.Command{
 			Name:   "timeout",
 			EnvVar: "CI_TIMEOUT",
 			Value:  time.Hour,
+		},
+		cli.BoolFlag{
+			Name:   "kubernetes",
+			EnvVar: "CI_KUBERNETES",
+		},
+		cli.StringFlag{
+			Name:   "kubernetes-namepsace",
+			EnvVar: "CI_KUBERNETES_NAMESPACE",
+			Value:  "default",
+		},
+		cli.StringFlag{
+			Name:   "kubernetes-endpoint",
+			EnvVar: "CI_KUBERNETES_ENDPOINT",
+		},
+		cli.StringFlag{
+			Name:   "kubernetes-token",
+			EnvVar: "CI_KUBERNETES_TOKEN",
 		},
 	},
 }
@@ -55,9 +73,18 @@ func executeAction(c *cli.Context) (err error) {
 		return err
 	}
 
-	engine, err := docker.NewEnv()
-	if err != nil {
-		return err
+	var engine backend.Engine
+	if c.Bool("kubernetes") {
+		engine = kubernetes.New(
+			c.String("kubernetes-namepsace"),
+			c.String("kubernetes-endpoint"),
+			c.String("kubernetes-token"),
+		)
+	} else {
+		engine, err = docker.NewEnv()
+		if err != nil {
+			return err
+		}
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), c.Duration("timeout"))

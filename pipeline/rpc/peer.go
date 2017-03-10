@@ -13,7 +13,8 @@ import (
 type (
 	// Filter defines filters for fetching items from the queue.
 	Filter struct {
-		Platform string `json:"platform"`
+		Labels map[string]string `json:"labels"`
+		Expr   string            `json:"expr"`
 	}
 
 	// State defines the pipeline state.
@@ -37,7 +38,7 @@ type (
 // Peer defines a peer-to-peer connection.
 type Peer interface {
 	// Next returns the next pipeline in the queue.
-	Next(c context.Context) (*Pipeline, error)
+	Next(c context.Context, f Filter) (*Pipeline, error)
 
 	// Wait blocks untilthe pipeline is complete.
 	Wait(c context.Context, id string) error

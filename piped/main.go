@@ -66,6 +66,11 @@ func start(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
+	filter := rpc.Filter{
+		Labels: map[string]string{
+			"platform": c.String("platform"),
+		},
+	}
 
 	client, err := rpc.NewClient(
 		endpoint.String(),
@@ -95,17 +100,17 @@ func start(c *cli.Context) error {
 		if sigterm.IsSet() {
 			return nil
 		}
-		if err := run(ctx, client); err != nil {
+		if err := run(ctx, client, filter); err != nil {
 			return err
 		}
 	}
 }
 
-func run(ctx context.Context, client rpc.Peer) error {
+func run(ctx context.Context, client rpc.Peer, filter rpc.Filter) error {
 	log.Println("pipeline: request next execution")
 
 	// get the next job from the queue
-	work, err := client.Next(ctx)
+	work, err := client.Next(ctx, filter)
 	if err != nil {
 		return err
 	}
