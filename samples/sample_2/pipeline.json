@@ -1,5 +1,5 @@
 {
-  "stages": [
+  "pipeline": [
     {
       "name": "pipeline_clone",
       "alias": "clone",
@@ -26,7 +26,7 @@
             "CI_REPO_NAME": "go-sql-driver/mysql",
             "CI_REPO_REMOTE": "https://github.com/go-sql-driver/mysql.git",
             "CI_SYSTEM": "pipec",
-            "CI_SYSTEM_ARCH": "pipec",
+            "CI_SYSTEM_ARCH": "linux/amd64",
             "CI_SYSTEM_LINK": "https://github.com/cncd/pipec",
             "CI_SYSTEM_NAME": "pipec",
             "CI_WORKSPACE": "/go/src/github.com/go-sql-driver/mysql",
@@ -46,7 +46,7 @@
             "DRONE_REPO_NAME": "go-sql-driver/mysql",
             "DRONE_REPO_REMOTE": "https://github.com/go-sql-driver/mysql.git",
             "DRONE_SYSTEM": "pipec",
-            "DRONE_SYSTEM_ARCH": "pipec",
+            "DRONE_SYSTEM_ARCH": "linux/amd64",
             "DRONE_SYSTEM_LINK": "https://github.com/cncd/pipec",
             "DRONE_SYSTEM_NAME": "pipec",
             "DRONE_WORKSPACE": "/go/src/github.com/go-sql-driver/mysql",
@@ -55,7 +55,12 @@
           "volumes": [
             "pipeline_default:/go"
           ],
-          "network": "pipeline_default",
+          "networks": [
+            {
+              "name": "pipeline_default",
+              "aliases": null
+            }
+          ],
           "on_success": true,
           "auth_config": {}
         }
@@ -88,7 +93,7 @@
             "CI_REPO_NAME": "go-sql-driver/mysql",
             "CI_REPO_REMOTE": "https://github.com/go-sql-driver/mysql.git",
             "CI_SYSTEM": "pipec",
-            "CI_SYSTEM_ARCH": "pipec",
+            "CI_SYSTEM_ARCH": "linux/amd64",
             "CI_SYSTEM_LINK": "https://github.com/cncd/pipec",
             "CI_SYSTEM_NAME": "pipec",
             "CI_WORKSPACE": "/go/src/github.com/go-sql-driver/mysql",
@@ -108,7 +113,7 @@
             "DRONE_REPO_NAME": "go-sql-driver/mysql",
             "DRONE_REPO_REMOTE": "https://github.com/go-sql-driver/mysql.git",
             "DRONE_SYSTEM": "pipec",
-            "DRONE_SYSTEM_ARCH": "pipec",
+            "DRONE_SYSTEM_ARCH": "linux/amd64",
             "DRONE_SYSTEM_LINK": "https://github.com/cncd/pipec",
             "DRONE_SYSTEM_NAME": "pipec",
             "DRONE_WORKSPACE": "/go/src/github.com/go-sql-driver/mysql",
@@ -118,9 +123,13 @@
           "volumes": [
             "pipeline_default:/go"
           ],
-          "network": "pipeline_default",
-          "network_aliases": [
-            "database"
+          "networks": [
+            {
+              "name": "pipeline_default",
+              "aliases": [
+                "database"
+              ]
+            }
           ],
           "on_success": true,
           "auth_config": {}
@@ -155,7 +164,7 @@
             "CI_REPO_REMOTE": "https://github.com/go-sql-driver/mysql.git",
             "CI_SCRIPT": "CmlmIFsgLW4gIiRDSV9ORVRSQ19NQUNISU5FIiBdOyB0aGVuCmNhdCA8PEVPRiA+ICRIT01FLy5uZXRyYwptYWNoaW5lICRDSV9ORVRSQ19NQUNISU5FCmxvZ2luICRDSV9ORVRSQ19VU0VSTkFNRQpwYXNzd29yZCAkQ0lfTkVUUkNfUEFTU1dPUkQKRU9GCmNobW9kIDA2MDAgJEhPTUUvLm5ldHJjCmZpCnVuc2V0IENJX05FVFJDX1VTRVJOQU1FCnVuc2V0IENJX05FVFJDX1BBU1NXT1JECnVuc2V0IENJX1NDUklQVAoKZWNobyArICJzbGVlcCAyMCIKc2xlZXAgMjAKCmVjaG8gKyAiZ28gZ2V0IC12IC10IgpnbyBnZXQgLXYgLXQKCmVjaG8gKyAiZ28gdGVzdCAtdiIKZ28gdGVzdCAtdgoK",
             "CI_SYSTEM": "pipec",
-            "CI_SYSTEM_ARCH": "pipec",
+            "CI_SYSTEM_ARCH": "linux/amd64",
             "CI_SYSTEM_LINK": "https://github.com/cncd/pipec",
             "CI_SYSTEM_NAME": "pipec",
             "CI_WORKSPACE": "/go/src/github.com/go-sql-driver/mysql",
@@ -175,7 +184,7 @@
             "DRONE_REPO_NAME": "go-sql-driver/mysql",
             "DRONE_REPO_REMOTE": "https://github.com/go-sql-driver/mysql.git",
             "DRONE_SYSTEM": "pipec",
-            "DRONE_SYSTEM_ARCH": "pipec",
+            "DRONE_SYSTEM_ARCH": "linux/amd64",
             "DRONE_SYSTEM_LINK": "https://github.com/cncd/pipec",
             "DRONE_SYSTEM_NAME": "pipec",
             "DRONE_WORKSPACE": "/go/src/github.com/go-sql-driver/mysql",
@@ -193,8 +202,14 @@
           "volumes": [
             "pipeline_default:/go"
           ],
-          "network": "pipeline_default",
-
+          "networks": [
+            {
+              "name": "pipeline_default",
+              "aliases": [
+                "database"
+              ]
+            }
+          ],
           "on_success": true,
           "auth_config": {}
         }

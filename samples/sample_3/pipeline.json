@@ -1,5 +1,5 @@
 {
-  "stages": [
+  "pipeline": [
     {
       "name": "pipeline_clone_0",
       "alias": "git",
@@ -27,7 +27,7 @@
             "CI_REPO_NAME": "drone/envsubst",
             "CI_REPO_REMOTE": "https://github.com/drone/envsubst.git",
             "CI_SYSTEM": "pipec",
-            "CI_SYSTEM_ARCH": "pipec",
+            "CI_SYSTEM_ARCH": "linux/amd64",
             "CI_SYSTEM_LINK": "https://github.com/cncd/pipec",
             "CI_SYSTEM_NAME": "pipec",
             "CI_WORKSPACE": "/go/src/github.com/drone/envsubst",
@@ -47,16 +47,21 @@
             "DRONE_REPO_NAME": "drone/envsubst",
             "DRONE_REPO_REMOTE": "https://github.com/drone/envsubst.git",
             "DRONE_SYSTEM": "pipec",
-            "DRONE_SYSTEM_ARCH": "pipec",
+            "DRONE_SYSTEM_ARCH": "linux/amd64",
             "DRONE_SYSTEM_LINK": "https://github.com/cncd/pipec",
             "DRONE_SYSTEM_NAME": "pipec",
             "DRONE_WORKSPACE": "/go/src/github.com/drone/envsubst",
             "PLUGIN_DEPTH": "50"
           },
           "volumes": [
-            "workspace:/go"
+            "pipeline_default:/go"
           ],
-          "network": "network",
+          "networks": [
+            {
+              "name": "pipeline_default",
+              "aliases": null
+            }
+          ],
           "on_success": true,
           "auth_config": {}
         }
@@ -90,7 +95,7 @@
             "CI_REPO_REMOTE": "https://github.com/drone/envsubst.git",
             "CI_SCRIPT": "CmlmIFsgLW4gIiRDSV9ORVRSQ19NQUNISU5FIiBdOyB0aGVuCmNhdCA8PEVPRiA+ICRIT01FLy5uZXRyYwptYWNoaW5lICRDSV9ORVRSQ19NQUNISU5FCmxvZ2luICRDSV9ORVRSQ19VU0VSTkFNRQpwYXNzd29yZCAkQ0lfTkVUUkNfUEFTU1dPUkQKRU9GCmNobW9kIDA2MDAgJEhPTUUvLm5ldHJjCmZpCnVuc2V0IENJX05FVFJDX1VTRVJOQU1FCnVuc2V0IENJX05FVFJDX1BBU1NXT1JECnVuc2V0IENJX1NDUklQVAoKZWNobyArICJlY2hvIHRoaXMgc3RlcCBzaG91bGQgZmFpbCIKZWNobyB0aGlzIHN0ZXAgc2hvdWxkIGZhaWwKCmVjaG8gKyAiZXhpdCAxIgpleGl0IDEKCg==",
             "CI_SYSTEM": "pipec",
-            "CI_SYSTEM_ARCH": "pipec",
+            "CI_SYSTEM_ARCH": "linux/amd64",
             "CI_SYSTEM_LINK": "https://github.com/cncd/pipec",
             "CI_SYSTEM_NAME": "pipec",
             "CI_WORKSPACE": "/go/src/github.com/drone/envsubst",
@@ -110,7 +115,7 @@
             "DRONE_REPO_NAME": "drone/envsubst",
             "DRONE_REPO_REMOTE": "https://github.com/drone/envsubst.git",
             "DRONE_SYSTEM": "pipec",
-            "DRONE_SYSTEM_ARCH": "pipec",
+            "DRONE_SYSTEM_ARCH": "linux/amd64",
             "DRONE_SYSTEM_LINK": "https://github.com/cncd/pipec",
             "DRONE_SYSTEM_NAME": "pipec",
             "DRONE_WORKSPACE": "/go/src/github.com/drone/envsubst",
@@ -125,9 +130,14 @@
             "echo $CI_SCRIPT | base64 -d | /bin/sh -e"
           ],
           "volumes": [
-            "workspace:/go"
+            "pipeline_default:/go"
           ],
-          "network": "network",
+          "networks": [
+            {
+              "name": "pipeline_default",
+              "aliases": null
+            }
+          ],
           "on_success": true,
           "auth_config": {}
         }
@@ -161,7 +171,7 @@
             "CI_REPO_REMOTE": "https://github.com/drone/envsubst.git",
             "CI_SCRIPT": "CmlmIFsgLW4gIiRDSV9ORVRSQ19NQUNISU5FIiBdOyB0aGVuCmNhdCA8PEVPRiA+ICRIT01FLy5uZXRyYwptYWNoaW5lICRDSV9ORVRSQ19NQUNISU5FCmxvZ2luICRDSV9ORVRSQ19VU0VSTkFNRQpwYXNzd29yZCAkQ0lfTkVUUkNfUEFTU1dPUkQKRU9GCmNobW9kIDA2MDAgJEhPTUUvLm5ldHJjCmZpCnVuc2V0IENJX05FVFJDX1VTRVJOQU1FCnVuc2V0IENJX05FVFJDX1BBU1NXT1JECnVuc2V0IENJX1NDUklQVAoKZWNobyArICJlY2hvIHRoaXMgc3RlcCBzaG91bGQgbmV2ZXIgZXhlY3V0ZSIKZWNobyB0aGlzIHN0ZXAgc2hvdWxkIG5ldmVyIGV4ZWN1dGUKCg==",
             "CI_SYSTEM": "pipec",
-            "CI_SYSTEM_ARCH": "pipec",
+            "CI_SYSTEM_ARCH": "linux/amd64",
             "CI_SYSTEM_LINK": "https://github.com/cncd/pipec",
             "CI_SYSTEM_NAME": "pipec",
             "CI_WORKSPACE": "/go/src/github.com/drone/envsubst",
@@ -181,7 +191,7 @@
             "DRONE_REPO_NAME": "drone/envsubst",
             "DRONE_REPO_REMOTE": "https://github.com/drone/envsubst.git",
             "DRONE_SYSTEM": "pipec",
-            "DRONE_SYSTEM_ARCH": "pipec",
+            "DRONE_SYSTEM_ARCH": "linux/amd64",
             "DRONE_SYSTEM_LINK": "https://github.com/cncd/pipec",
             "DRONE_SYSTEM_NAME": "pipec",
             "DRONE_WORKSPACE": "/go/src/github.com/drone/envsubst",
@@ -196,9 +206,14 @@
             "echo $CI_SCRIPT | base64 -d | /bin/sh -e"
           ],
           "volumes": [
-            "workspace:/go"
+            "pipeline_default:/go"
           ],
-          "network": "network",
+          "networks": [
+            {
+              "name": "pipeline_default",
+              "aliases": null
+            }
+          ],
           "on_success": true,
           "auth_config": {}
         }
@@ -207,13 +222,13 @@
   ],
   "networks": [
     {
-      "name": "network",
+      "name": "pipeline_default",
       "driver": "bridge"
     }
   ],
   "volumes": [
     {
-      "name": "workspace",
+      "name": "pipeline_default",
       "driver": "local"
     }
   ]
