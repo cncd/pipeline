@@ -85,7 +85,6 @@ func (r *textReader) NextPart() (Part, error) {
 	r.done = true
 	p := new(part)
 	p.Reader = r.reader
-	p.filename = "terminal.log"
 	return p, nil
 }
 

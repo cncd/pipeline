@@ -15,10 +15,11 @@ type (
 
 	// Repo defines runtime metadata for a repository.
 	Repo struct {
-		Name    string `json:"name,omitempty"`
-		Link    string `json:"link,omitempty"`
-		Remote  string `json:"remote,omitempty"`
-		Private bool   `json:"private,omitempty"`
+		Name    string   `json:"name,omitempty"`
+		Link    string   `json:"link,omitempty"`
+		Remote  string   `json:"remote,omitempty"`
+		Private bool     `json:"private,omitempty"`
+		Secrets []Secret `json:"secrets,omitempty"`
 	}
 
 	// Build defines runtime metadata for a build.
@@ -57,6 +58,14 @@ type (
 	Job struct {
 		Number int               `json:"number,omitempty"`
 		Matrix map[string]string `json:"matrix,omitempty"`
+	}
+
+	// Secret defines a runtime secret
+	Secret struct {
+		Name  string `json:"name,omitempty"`
+		Value string `json:"value,omitempty"`
+		Mount string `json:"mount,omitempty"`
+		Mask  bool   `json:"mask,omitempty"`
 	}
 
 	// System defines runtime metadata for a ci/cd system.

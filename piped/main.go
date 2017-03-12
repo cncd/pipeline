@@ -53,6 +53,9 @@ func main() {
 			Value:  "linux/amd64",
 		},
 	}
+	app.Commands = []cli.Command{
+		onceCommand,
+	}
 
 	if err := app.Run(os.Args); err != nil {
 		log.Fatalln(err)
@@ -175,7 +178,13 @@ func run(ctx context.Context, client rpc.Peer, filter rpc.Filter) error {
 		}
 		uploads.Add(1)
 
-		writer := rpc.NewLineWriter(client, work.ID, proc.Name)
+		var secrets []string
+		for _, secret := range work.Config.Secrets {
+			if secret.Mask {
+				secrets = append(secrets, secret.Value)
+			}
+		}
+		writer := rpc.NewLineWriter(client, work.ID, proc.Name, secrets...)
 		io.Copy(writer, part)
 
 		defer func() {
@@ -188,7 +197,7 @@ func run(ctx context.Context, client rpc.Peer, filter rpc.Filter) error {
 			return nil
 		}
 		mime := part.Header().Get("Content-Type")
-		if serr := client.Save(context.Background(), work.ID, mime, part); serr != nil {
+		if serr := client.Upload(context.Background(), work.ID, mime, part); serr != nil {
 			log.Printf("pipeline: cannot upload artifact: %s: %s: %s", work.ID, mime, serr)
 		}
 		return nil
