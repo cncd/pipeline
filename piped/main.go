@@ -22,6 +22,11 @@ import (
 	"github.com/urfave/cli"
 )
 
+const (
+	maxFileUpload = 5000000
+	maxLogsUpload = 5000000
+)
+
 func main() {
 	app := cli.NewApp()
 	app.Name = "piped"
@@ -51,6 +56,11 @@ func main() {
 			Name:   "platform",
 			EnvVar: "PIPED_PLATFORM",
 			Value:  "linux/amd64",
+		},
+		cli.Int64Flag{
+			Name:   "upload-limit",
+			EnvVar: "PIPED_UPLOAD_LIMIT",
+			Value:  math.MaxInt32,
 		},
 	}
 	app.Commands = []cli.Command{
@@ -184,8 +194,9 @@ func run(ctx context.Context, client rpc.Peer, filter rpc.Filter) error {
 				secrets = append(secrets, secret.Value)
 			}
 		}
+		limitedPart := io.LimitReader(part, maxLogsUpload)
 		writer := rpc.NewLineWriter(client, work.ID, proc.Name, secrets...)
-		io.Copy(writer, part)
+		io.Copy(writer, limitedPart)
 
 		defer func() {
 			log.Printf("pipeline: finish uploading logs: %s: step %s", work.ID, proc.Alias)
@@ -196,8 +207,10 @@ func run(ctx context.Context, client rpc.Peer, filter rpc.Filter) error {
 		if rerr != nil {
 			return nil
 		}
+		// TODO should be configurable
+		limitedPart = io.LimitReader(part, maxFileUpload)
 		mime := part.Header().Get("Content-Type")
-		if serr := client.Upload(context.Background(), work.ID, mime, part); serr != nil {
+		if serr := client.Upload(context.Background(), work.ID, mime, limitedPart); serr != nil {
 			log.Printf("pipeline: cannot upload artifact: %s: %s: %s", work.ID, mime, serr)
 		}
 		return nil
