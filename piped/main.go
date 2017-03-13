@@ -212,6 +212,8 @@ func run(ctx context.Context, client rpc.Peer, filter rpc.Filter) error {
 		mime := part.Header().Get("Content-Type")
 		if serr := client.Upload(context.Background(), work.ID, mime, limitedPart); serr != nil {
 			log.Printf("pipeline: cannot upload artifact: %s: %s: %s", work.ID, mime, serr)
+		} else {
+			log.Printf("pipeline: finish uploading artifact: %s: step %s: %s", mime, work.ID, proc.Alias)
 		}
 		return nil
 	})

@@ -2,11 +2,15 @@ package coverage
 
 import (
 	"encoding/json"
-	"io"
+	"fmt"
+	"strconv"
+
+	"mime/multipart"
+	"net/textproto"
 )
 
 // MimeType used by coverage reports.
-const MimeType = "application/coverage+json"
+const MimeType = "application/json+coverage"
 
 type (
 	// Report represents a coverage report.
@@ -37,9 +41,18 @@ type (
 	}
 )
 
-// WriteTo writes the report to io.Writer w.
-func (r *Report) WriteTo(w io.Writer) (n int64, err error) {
-	// TODO this should write to the multi-part document so that we can
-	// include the mimetype and headers.
-	return n, json.NewEncoder(w).Encode(r)
+// WriteTo writes the report to multipart.Writer w.
+func (r *Report) WriteTo(w *multipart.Writer) error {
+	header := textproto.MIMEHeader{}
+	header.Set("Content-Type", MimeType)
+	header.Set("X-Covered", fmt.Sprintf("%.2f", r.Metrics.Covered))
+	header.Set("X-Covered-Lines", strconv.Itoa(r.Metrics.CoveredLines))
+	header.Set("X-Total-Lines", strconv.Itoa(r.Metrics.TotalLines))
+	part, err := w.CreatePart(header)
+	if err != nil {
+		return err
+	}
+	encoder := json.NewEncoder(part)
+	encoder.SetIndent("", "  ")
+	return encoder.Encode(r)
 }
