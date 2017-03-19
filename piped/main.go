@@ -195,7 +195,7 @@ func run(ctx context.Context, client rpc.Peer, filter rpc.Filter) error {
 			}
 		}
 		limitedPart := io.LimitReader(part, maxLogsUpload)
-		writer := rpc.NewLineWriter(client, work.ID, proc.Name, secrets...)
+		writer := rpc.NewLineWriter(client, work.ID, proc.Alias, secrets...)
 		io.Copy(writer, limitedPart)
 
 		defer func() {
