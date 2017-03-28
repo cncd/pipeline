@@ -145,9 +145,12 @@ func WithProxy() Option {
 
 // WithNetworks configures the compiler with additionnal networks
 // to be connected to build containers
-func WithNetworks() Option {
+func WithNetworks(networks ...string) Option {
 	return func(compiler *Compiler) {
-		compiler.networks = strings.Split(externalNetworks, ",")
+    for _, network := range networks {
+      compiler.networks = append(compiler.networks,
+        strings.Split(getenv(network), ",")...)
+		}
 	}
 }
 
@@ -172,10 +175,6 @@ var (
 	noProxy    = getenv("no_proxy")
 	httpProxy  = getenv("https_proxy")
 	httpsProxy = getenv("https_proxy")
-)
-
-var (
-	externalNetworks = getenv("external_networks")
 )
 
 // getenv returns the named environment variable.
