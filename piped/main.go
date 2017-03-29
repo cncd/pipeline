@@ -2,11 +2,14 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"io"
+	"io/ioutil"
 	"log"
 	"math"
 	"net/url"
 	"os"
+	"strconv"
 	"sync"
 	"time"
 
@@ -175,9 +178,9 @@ func run(ctx context.Context, client rpc.Peer, filter rpc.Filter) error {
 
 	state := rpc.State{}
 	state.Started = time.Now().Unix()
-	err = client.Update(context.Background(), work.ID, state)
+	err = client.Init(context.Background(), work.ID, state)
 	if err != nil {
-		log.Printf("pipeline: error updating pipeline status: %s: %s", work.ID, err)
+		log.Printf("pipeline: error signaling pipeline init: %s: %s", work.ID, err)
 	}
 
 	var uploads sync.WaitGroup
@@ -194,9 +197,24 @@ func run(ctx context.Context, client rpc.Peer, filter rpc.Filter) error {
 				secrets = append(secrets, secret.Value)
 			}
 		}
+
 		limitedPart := io.LimitReader(part, maxLogsUpload)
-		writer := rpc.NewLineWriter(client, work.ID, proc.Alias, secrets...)
-		io.Copy(writer, limitedPart)
+		logstream := rpc.NewLineWriter(client, work.ID, proc.Alias, secrets...)
+		io.Copy(logstream, limitedPart)
+
+		file := &rpc.File{}
+		file.Mime = "application/json+logs"
+		file.Proc = proc.Alias
+		file.Name = "logs.json"
+		file.Data, _ = json.Marshal(logstream.Lines())
+		file.Size = len(file.Data)
+		file.Time = time.Now().Unix()
+
+		if serr := client.Upload(context.Background(), work.ID, file); serr != nil {
+			log.Printf("pipeline: cannot upload logs: %s: %s: %s", work.ID, file.Mime, serr)
+		} else {
+			log.Printf("pipeline: finish uploading logs: %s: step %s: %s", file.Mime, work.ID, proc.Alias)
+		}
 
 		defer func() {
 			log.Printf("pipeline: finish uploading logs: %s: step %s", work.ID, proc.Alias)
@@ -209,11 +227,52 @@ func run(ctx context.Context, client rpc.Peer, filter rpc.Filter) error {
 		}
 		// TODO should be configurable
 		limitedPart = io.LimitReader(part, maxFileUpload)
-		mime := part.Header().Get("Content-Type")
-		if serr := client.Upload(context.Background(), work.ID, mime, limitedPart); serr != nil {
-			log.Printf("pipeline: cannot upload artifact: %s: %s: %s", work.ID, mime, serr)
+		file = &rpc.File{}
+		file.Mime = part.Header().Get("Content-Type")
+		file.Proc = proc.Alias
+		file.Name = part.FileName()
+		file.Data, _ = ioutil.ReadAll(limitedPart)
+		file.Size = len(file.Data)
+		file.Time = time.Now().Unix()
+
+		if serr := client.Upload(context.Background(), work.ID, file); serr != nil {
+			log.Printf("pipeline: cannot upload artifact: %s: %s: %s", work.ID, file.Mime, serr)
 		} else {
-			log.Printf("pipeline: finish uploading artifact: %s: step %s: %s", mime, work.ID, proc.Alias)
+			log.Printf("pipeline: finish uploading artifact: %s: step %s: %s", file.Mime, work.ID, proc.Alias)
+		}
+		return nil
+	})
+
+	defaultTracer := pipeline.TraceFunc(func(state *pipeline.State) error {
+		procState := rpc.State{
+			Proc:     state.Pipeline.Step.Alias,
+			Exited:   state.Process.Exited,
+			ExitCode: state.Process.ExitCode,
+			Started:  time.Now().Unix(), // TODO do not do this
+			Finished: time.Now().Unix(),
+		}
+		defer func() {
+			if uerr := client.Update(context.Background(), work.ID, procState); uerr != nil {
+				log.Printf("Pipeine: error updating pipeline step status: %s: %s: %s", work.ID, procState.Proc, uerr)
+			}
+		}()
+		if state.Process.Exited {
+			return nil
+		}
+		if state.Pipeline.Step.Environment == nil {
+			state.Pipeline.Step.Environment = map[string]string{}
+		}
+		state.Pipeline.Step.Environment["CI_BUILD_STATUS"] = "success"
+		state.Pipeline.Step.Environment["CI_BUILD_STARTED"] = strconv.FormatInt(state.Pipeline.Time, 10)
+		state.Pipeline.Step.Environment["CI_BUILD_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
+
+		state.Pipeline.Step.Environment["CI_JOB_STATUS"] = "success"
+		state.Pipeline.Step.Environment["CI_JOB_STARTED"] = strconv.FormatInt(state.Pipeline.Time, 10)
+		state.Pipeline.Step.Environment["CI_JOB_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
+
+		if state.Pipeline.Error != nil {
+			state.Pipeline.Step.Environment["CI_BUILD_STATUS"] = "failure"
+			state.Pipeline.Step.Environment["CI_JOB_STATUS"] = "failure"
 		}
 		return nil
 	})
@@ -221,7 +280,7 @@ func run(ctx context.Context, client rpc.Peer, filter rpc.Filter) error {
 	err = pipeline.New(work.Config,
 		pipeline.WithContext(ctx),
 		pipeline.WithLogger(defaultLogger),
-		pipeline.WithTracer(pipeline.DefaultTracer),
+		pipeline.WithTracer(defaultTracer),
 		pipeline.WithEngine(engine),
 	).Run()
 
@@ -245,12 +304,8 @@ func run(ctx context.Context, client rpc.Peer, filter rpc.Filter) error {
 	log.Printf("pipeline: execution complete: %s", work.ID)
 
 	uploads.Wait()
-	err = client.Update(context.Background(), work.ID, state)
-	if err != nil {
-		log.Printf("Pipeine: error updating pipeline status: %s: %s", work.ID, err)
-	}
 
-	err = client.Done(context.Background(), work.ID)
+	err = client.Done(context.Background(), work.ID, state)
 	if err != nil {
 		log.Printf("Pipeine: error signaling pipeline done: %s: %s", work.ID, err)
 	}
