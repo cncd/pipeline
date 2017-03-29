@@ -147,10 +147,7 @@ func WithProxy() Option {
 // to be connected to build containers
 func WithNetworks(networks ...string) Option {
 	return func(compiler *Compiler) {
-    for _, network := range networks {
-      compiler.networks = append(compiler.networks,
-        strings.Split(getenv(network), ",")...)
-		}
+    compiler.networks = networks
 	}
 }
 

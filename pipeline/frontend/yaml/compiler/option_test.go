@@ -47,6 +47,18 @@ func TestWithVolumes(t *testing.T) {
 	}
 }
 
+func TestWithNetworks(t *testing.T) {
+	compiler := New(
+		WithNetworks(
+			"overlay_1",
+			"overlay_bar",
+		),
+	)
+	if compiler.networks[0] != "overlay_1" || compiler.networks[1] != "overlay_bar" {
+		t.Errorf("TestWithNetworks must set networks from parameters")
+	}
+}
+
 func TestWithPrefix(t *testing.T) {
 	if New(WithPrefix("drone_")).prefix != "drone_" {
 		t.Errorf("WithPrefix must set the prefix")
