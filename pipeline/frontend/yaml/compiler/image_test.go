@@ -138,12 +138,12 @@ func TestMatchImage(t *testing.T) {
 		{
 			from: "golang",
 			to:   "golang:latest",
-			want: false,
+			want: true,
 		},
 		{
 			from: "library/golang:latest",
 			to:   "library/golang",
-			want: false,
+			want: true,
 		},
 		{
 			from: "gcr.io/golang",
@@ -163,6 +163,26 @@ func TestMatchImage(t *testing.T) {
 		{
 			from: "gcr.io/golang",
 			to:   "gcr.io/golang:latest",
+			want: true,
+		},
+		{
+			from: "golang",
+			to:   "library/golang",
+			want: true,
+		},
+		{
+			from: "golang",
+			to:   "gcr.io/project/golang",
+			want: false,
+		},
+		{
+			from: "golang",
+			to:   "gcr.io/library/golang",
+			want: false,
+		},
+		{
+			from: "golang",
+			to:   "gcr.io/golang",
 			want: false,
 		},
 	}
