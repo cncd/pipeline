@@ -12,24 +12,42 @@ import (
 // TODO(bradrydzewski) compiler should handle user-defined volumes from YAML
 // TODO(bradrydzewski) compiler should handle user-defined networks from YAML
 
+type Registry struct {
+	Hostname string
+	Username string
+	Password string
+	Email    string
+	Token    string
+}
+
+type Secret struct {
+	Name  string
+	Value string
+	Match []string
+}
+
 // Compiler compiles the yaml
 type Compiler struct {
-	local     bool
-	escalated []string
-	prefix    string
-	volumes   []string
-	networks  []string
-	env       map[string]string
-	base      string
-	path      string
-	metadata  frontend.Metadata
-	aliases   []string
+	local      bool
+	escalated  []string
+	prefix     string
+	volumes    []string
+	networks   []string
+	env        map[string]string
+	base       string
+	path       string
+	metadata   frontend.Metadata
+	registries []Registry
+	secrets    map[string]Secret
+	aliases    []string
 }
 
 // New creates a new Compiler with options.
 func New(opts ...Option) *Compiler {
-	compiler := new(Compiler)
-	compiler.env = map[string]string{}
+	compiler := &Compiler{
+		env:     map[string]string{},
+		secrets: map[string]Secret{},
+	}
 	for _, opt := range opts {
 		opt(compiler)
 	}

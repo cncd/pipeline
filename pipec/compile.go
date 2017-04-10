@@ -3,10 +3,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 
 	"github.com/cncd/pipeline/pipeline/frontend"
 	"github.com/cncd/pipeline/pipeline/frontend/yaml"
@@ -45,6 +45,21 @@ var compileCommand = cli.Command{
 		},
 		cli.BoolFlag{
 			Name: "local",
+		},
+		//
+		// registry credentials
+		//
+		cli.StringFlag{
+			Name:   "registry-hostname",
+			EnvVar: "CI_REGISTRY_HOSTNAME",
+		},
+		cli.StringFlag{
+			Name:   "registry-username",
+			EnvVar: "CI_REGISTRY_USERNAME",
+		},
+		cli.StringFlag{
+			Name:   "registry-password",
+			EnvVar: "CI_REGISTRY_PASSWORD",
 		},
 		//
 		// workspace default
@@ -269,11 +284,29 @@ func compileAction(c *cli.Context) (err error) {
 		volumes = append(volumes, dir+":"+path.Join(workspaceBase, workspacePath))
 	}
 
+	// secrets from environment variable
+	var secrets []compiler.Secret
+	for _, env := range os.Environ() {
+		parts := strings.Split(env, "=")
+		secrets = append(secrets, compiler.Secret{
+			Name:  parts[0],
+			Value: parts[1],
+		})
+	}
+
 	// compiles the yaml file
 	compiled := compiler.New(
+		compiler.WithRegistry(
+			compiler.Registry{
+				Hostname: c.String("registry-hostname"),
+				Username: c.String("registry-username"),
+				Password: c.String("registry-password"),
+			},
+		),
 		compiler.WithEscalated(
 			c.StringSlice("privileged")...,
 		),
+		compiler.WithSecret(secrets...),
 		compiler.WithVolumes(volumes...),
 		compiler.WithWorkspace(
 			c.String("workspace-base"),
@@ -303,7 +336,7 @@ func compileAction(c *cli.Context) (err error) {
 	}
 
 	// create output file with option to dump to stdout
-	var writer io.WriteCloser = os.Stdout
+	var writer = os.Stdout
 	output := c.String("out")
 	if output != "-" {
 		writer, err = os.Create(output)
