@@ -28,9 +28,9 @@ func (c *Compiler) createProcess(name string, container *yaml.Container) *backen
 		},
 	}
 	for _, network := range c.networks {
-	  networks = append(networks, backend.Conn{
-	    Name:     network,
-	  })
+		networks = append(networks, backend.Conn{
+			Name: network,
+		})
 	}
 
 	var volumes []string

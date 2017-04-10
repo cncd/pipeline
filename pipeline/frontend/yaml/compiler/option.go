@@ -147,7 +147,7 @@ func WithProxy() Option {
 // to be connected to build containers
 func WithNetworks(networks ...string) Option {
 	return func(compiler *Compiler) {
-    compiler.networks = networks
+		compiler.networks = networks
 	}
 }
 
