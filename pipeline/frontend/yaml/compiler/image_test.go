@@ -229,6 +229,11 @@ func TestMatchHostname(t *testing.T) {
 			hostname: "gcr.io",
 			want:     true,
 		},
+		{
+			image:    "1.2.3.4:8000/golang:1.0.0",
+			hostname: "1.2.3.4:8000",
+			want:     true,
+		},
 	}
 	for _, test := range testdata {
 		got, want := matchHostname(test.image, test.hostname), test.want
