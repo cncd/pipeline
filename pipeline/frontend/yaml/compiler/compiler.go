@@ -140,7 +140,7 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 		if c.local && !container.Constraints.Local.Bool() {
 			continue
 		}
-		//Skip if remove and should only run local
+		//Skip if remote and should only run local
 		if !c.local && container.Constraints.Local.Bool() {
 			continue
 		}
