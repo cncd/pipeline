@@ -140,10 +140,7 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 		if c.local && !container.Constraints.Local.Bool() {
 			continue
 		}
-		//Skip if remote and should only run local
-		if !c.local && container.Constraints.Local.Bool() {
-			continue
-		}
+
 		if !container.Constraints.Match(c.metadata) {
 			continue
 		}
