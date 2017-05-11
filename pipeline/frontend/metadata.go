@@ -152,7 +152,7 @@ func (m *Metadata) Environ() map[string]string {
 }
 
 // EnvironDrone returns metadata as a map of DRONE_ environment variables.
-// This is here for backward compatibility and will eventually be removed.
+// TODO: This is here for backward compatibility and will eventually be removed.
 func (m *Metadata) EnvironDrone() map[string]string {
 	// MISSING PARAMETERS
 	// * DRONE_REPO_TRUSTED
