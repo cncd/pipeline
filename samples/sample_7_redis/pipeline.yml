@@ -1,0 +1,16 @@
+workspace:
+  base: /go
+  path: src/github.com/drone/envsubst
+
+pipeline:
+  build:
+    image: redis:3.0
+    commands:
+      - sleep 1 # redis needs a second to init
+      - redis-cli -h redis ping
+      - redis-cli -h redis set HELLO hello
+      - redis-cli -h redis get HELLO
+
+services:
+  redis:
+    image: redis:3.0
