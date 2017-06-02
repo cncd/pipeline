@@ -18,6 +18,7 @@ type (
 		Clone     Containers
 		Pipeline  Containers
 		Services  Containers
+                NetworkMode string
 		Networks  Networks
 		Volumes   Volumes
 		Labels    libcompose.SliceorMap
