@@ -88,6 +88,10 @@ func TestLintErrors(t *testing.T) {
 			from: "pipeline: { build: { image: golang, volumes: [ '/opt/data:/var/lib/mysql' ] }  }",
 			want: "Insufficient privileges to use volumes",
 		},
+		{
+			from: "pipeline: { build: { image: golang, network_mode: 'container:name' }  }",
+			want: "Insufficient privileges to use network_mode",
+		},
 		// cannot override entypoint, command for script steps
 		{
 			from: "pipeline: { build: { image: golang, commands: [ 'go build' ], entrypoint: [ '/bin/bash' ] } }",
