@@ -14,12 +14,12 @@ func (c *Compiler) createProcess(name string, container *yaml.Container) *backen
 		detached   bool
 		workingdir string
 
-		workspace  = fmt.Sprintf("%s_default:%s", c.prefix, c.base)
-		privileged = container.Privileged
-		entrypoint = container.Entrypoint
-		command    = container.Command
-		image      = expandImage(container.Image)
-                network_mode = container.NetworkMode
+		workspace    = fmt.Sprintf("%s_default:%s", c.prefix, c.base)
+		privileged   = container.Privileged
+		entrypoint   = container.Entrypoint
+		command      = container.Command
+		image        = expandImage(container.Image)
+		network_mode = container.NetworkMode
 		// network    = container.Network
 	)
 
@@ -138,7 +138,7 @@ func (c *Compiler) createProcess(name string, container *yaml.Container) *backen
 		OnFailure: (len(container.Constraints.Status.Include)+
 			len(container.Constraints.Status.Exclude) != 0) &&
 			container.Constraints.Status.Match("failure"),
-                NetworkMode:  network_mode,
+		NetworkMode: network_mode,
 	}
 }
 

@@ -12,16 +12,16 @@ import (
 type (
 	// Config defines a pipeline configuration.
 	Config struct {
-		Platform  string
-		Branches  Constraint
-		Workspace Workspace
-		Clone     Containers
-		Pipeline  Containers
-		Services  Containers
-                NetworkMode string
-		Networks  Networks
-		Volumes   Volumes
-		Labels    libcompose.SliceorMap
+		Platform    string
+		Branches    Constraint
+		Workspace   Workspace
+		Clone       Containers
+		Pipeline    Containers
+		Services    Containers
+		NetworkMode string
+		Networks    Networks
+		Volumes     Volumes
+		Labels      libcompose.SliceorMap
 	}
 
 	// Workspace defines a pipeline workspace.

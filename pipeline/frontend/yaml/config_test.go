@@ -35,7 +35,7 @@ func xTestParse(t *testing.T) {
 				g.Assert(out.Pipeline.Containers[1].Commands).Equal(yaml.Stringorslice{"go build"})
 				g.Assert(out.Pipeline.Containers[2].Name).Equal("notify")
 				g.Assert(out.Pipeline.Containers[2].Image).Equal("slack")
-                                g.Assert(out.Pipeline.Containers[2].NetworkMode).Equal("container:name")
+				g.Assert(out.Pipeline.Containers[2].NetworkMode).Equal("container:name")
 				g.Assert(out.Labels["com.example.team"]).Equal("frontend")
 				g.Assert(out.Labels["com.example.type"]).Equal("build")
 			})
