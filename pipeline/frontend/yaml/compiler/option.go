@@ -169,6 +169,21 @@ func WithNetworks(networks ...string) Option {
 	}
 }
 
+// WithResourceLimits configures the compiler with default resource limits that
+// are applied each container in the pipeline.
+func WithResourceLimit(swap, mem, shmsize, cpuQuota, cpuShares int64, cpuSet string) Option {
+	return func(compiler *Compiler) {
+		compiler.reslimit = ResourceLimit{
+			MemSwapLimit: swap,
+			MemLimit:     mem,
+			ShmSize:      shmsize,
+			CPUQuota:     cpuQuota,
+			CPUShares:    cpuShares,
+			CPUSet:       cpuSet,
+		}
+	}
+}
+
 // TODO(bradrydzewski) consider an alternate approach to
 // WithProxy where the proxy strings are passed directly
 // to the function as named parameters.

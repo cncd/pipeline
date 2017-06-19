@@ -26,6 +26,15 @@ type Secret struct {
 	Match []string
 }
 
+type ResourceLimit struct {
+	MemSwapLimit int64
+	MemLimit     int64
+	ShmSize      int64
+	CPUQuota     int64
+	CPUShares    int64
+	CPUSet       string
+}
+
 // Compiler compiles the yaml
 type Compiler struct {
 	local      bool
@@ -39,6 +48,7 @@ type Compiler struct {
 	metadata   frontend.Metadata
 	registries []Registry
 	secrets    map[string]Secret
+	reslimit   ResourceLimit
 }
 
 // New creates a new Compiler with options.
