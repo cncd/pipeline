@@ -25,6 +25,15 @@ type Secret struct {
 	Match []string
 }
 
+type ResourceLimit struct {
+	MemSwapLimit int64
+	MemLimit     int64
+	ShmSize      int64
+	CPUQuota     int64
+	CPUShares    int64
+	CPUSet       string
+}
+
 // Compiler compiles the yaml
 type Compiler struct {
 	local      bool
@@ -39,6 +48,7 @@ type Compiler struct {
 	registries []Registry
 	secrets    map[string]Secret
 	cacher     Cacher
+	reslimit   ResourceLimit
 }
 
 // New creates a new Compiler with options.
@@ -170,7 +180,7 @@ func (c *Compiler) setupCache(conf *yaml.Config, ir *backend.Config) {
 		return
 	}
 
-	container := c.cacher.Restore(c.metadata.Repo.Name, c.metadata.Curr.Commit.Branch)
+	container := c.cacher.Restore(c.metadata.Repo.Name, c.metadata.Curr.Commit.Branch, conf.Cache)
 	name := fmt.Sprintf("%s_restore_cache", c.prefix)
 	step := c.createProcess(name, container)
 
@@ -186,7 +196,7 @@ func (c *Compiler) setupCacheRebuild(conf *yaml.Config, ir *backend.Config) {
 	if c.local || len(conf.Cache) == 0 || c.metadata.Curr.Event != "push" || c.cacher == nil {
 		return
 	}
-	container := c.cacher.Rebuild(c.metadata.Repo.Name, c.metadata.Curr.Commit.Branch)
+	container := c.cacher.Rebuild(c.metadata.Repo.Name, c.metadata.Curr.Commit.Branch, conf.Cache)
 
 	name := fmt.Sprintf("%s_rebuild_cache", c.prefix)
 	step := c.createProcess(name, container)

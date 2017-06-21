@@ -11,15 +11,15 @@ import (
 // Cacher defines a compiler transform that can be used
 // to implement default caching for a repository.
 type Cacher interface {
-	Restore(repo, branch string) *yaml.Container
-	Rebuild(repo, branch string) *yaml.Container
+	Restore(repo, branch string, mounts []string) *yaml.Container
+	Rebuild(repo, branch string, mounts []string) *yaml.Container
 }
 
 type volumeCacher struct {
 	base string
 }
 
-func (c *volumeCacher) Restore(repo, branch string) *yaml.Container {
+func (c *volumeCacher) Restore(repo, branch string, mounts []string) *yaml.Container {
 	return &yaml.Container{
 		Name:  "rebuild_cache",
 		Image: "plugins/volume-cache:latest",
@@ -40,13 +40,14 @@ func (c *volumeCacher) Restore(repo, branch string) *yaml.Container {
 	}
 }
 
-func (c *volumeCacher) Rebuild(repo, branch string) *yaml.Container {
+func (c *volumeCacher) Rebuild(repo, branch string, mounts []string) *yaml.Container {
 	return &yaml.Container{
 		Name:  "rebuild_cache",
 		Image: "plugins/volume-cache:latest",
 		Vargs: map[string]interface{}{
 			"rebuild": true,
 			"path":    path.Join("/cache", branch, "cache.tar.gz"),
+			"flush":   true,
 		},
 		Volumes: libcompose.Volumes{
 			Volumes: []*libcompose.Volume{
@@ -64,9 +65,10 @@ type s3Cacher struct {
 	bucket string
 	access string
 	secret string
+	region string
 }
 
-func (c *s3Cacher) Restore(repo, branch string) *yaml.Container {
+func (c *s3Cacher) Restore(repo, branch string, mounts []string) *yaml.Container {
 	return &yaml.Container{
 		Name:  "rebuild_cache",
 		Image: "plugins/s3-cache:latest",
@@ -74,14 +76,13 @@ func (c *s3Cacher) Restore(repo, branch string) *yaml.Container {
 			"access_key": c.access,
 			"secret_key": c.secret,
 			"bucket":     c.bucket,
+			"region":     c.region,
 			"rebuild":    true,
-			"fallback":   path.Join(repo, "master", "cache.tar.gz"),
-			"path":       path.Join(repo, branch, "cache.tar.gz"),
 		},
 	}
 }
 
-func (c *s3Cacher) Rebuild(repo, branch string) *yaml.Container {
+func (c *s3Cacher) Rebuild(repo, branch string, mounts []string) *yaml.Container {
 	return &yaml.Container{
 		Name:  "rebuild_cache",
 		Image: "plugins/s3-cache:latest",
@@ -89,8 +90,9 @@ func (c *s3Cacher) Rebuild(repo, branch string) *yaml.Container {
 			"access_key": c.access,
 			"secret_key": c.secret,
 			"bucket":     c.bucket,
+			"region":     c.region,
 			"rebuild":    true,
-			"path":       path.Join(repo, branch, "cache.tar.gz"),
+			"flush":      true,
 		},
 	}
 }
