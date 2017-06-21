@@ -193,3 +193,35 @@ func TestGetenv(t *testing.T) {
 		t.Errorf("Expect x_test_bar=bar is empty")
 	}
 }
+
+func TestWithVolumeCacher(t *testing.T) {
+	compiler := New(
+		WithVolumeCacher("/cache"),
+	)
+	cacher, ok := compiler.cacher.(*volumeCacher)
+	if !ok {
+		t.Errorf("Expected volume cacher configured")
+	}
+	if got, want := cacher.base, "/cache"; got != want {
+		t.Errorf("Expected volume cacher with base %s, got %s", want, got)
+	}
+}
+
+func TestWithS3Cacher(t *testing.T) {
+	compiler := New(
+		WithS3Cacher("some-access-key", "some-secret-key", "some-bucket"),
+	)
+	cacher, ok := compiler.cacher.(*s3Cacher)
+	if !ok {
+		t.Errorf("Expected s3 cacher configured")
+	}
+	if got, want := cacher.bucket, "some-bucket"; got != want {
+		t.Errorf("Expected s3 cacher with bucket %s, got %s", want, got)
+	}
+	if got, want := cacher.access, "some-access-key"; got != want {
+		t.Errorf("Expected s3 cacher with access key %s, got %s", want, got)
+	}
+	if got, want := cacher.secret, "some-secret-key"; got != want {
+		t.Errorf("Expected s3 cacher with secret key %s, got %s", want, got)
+	}
+}

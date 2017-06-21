@@ -6,7 +6,6 @@ import (
 	"github.com/cncd/pipeline/pipeline/backend"
 	"github.com/cncd/pipeline/pipeline/frontend"
 	"github.com/cncd/pipeline/pipeline/frontend/yaml"
-	// libcompose "github.com/docker/libcompose/yaml"
 )
 
 // TODO(bradrydzewski) compiler should handle user-defined volumes from YAML
@@ -39,6 +38,7 @@ type Compiler struct {
 	metadata   frontend.Metadata
 	registries []Registry
 	secrets    map[string]Secret
+	cacher     Cacher
 }
 
 // New creates a new Compiler with options.
@@ -112,6 +112,8 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 		}
 	}
 
+	c.setupCache(conf, config)
+
 	// add services steps
 	if len(conf.Services.Containers) != 0 {
 		stage := new(backend.Stage)
@@ -158,5 +160,41 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 		stage.Steps = append(stage.Steps, step)
 	}
 
+	c.setupCacheRebuild(conf, config)
+
 	return config
+}
+
+func (c *Compiler) setupCache(conf *yaml.Config, ir *backend.Config) {
+	if c.local || len(conf.Cache) == 0 || c.cacher == nil {
+		return
+	}
+
+	container := c.cacher.Restore(c.metadata.Repo.Name, c.metadata.Curr.Commit.Branch)
+	name := fmt.Sprintf("%s_restore_cache", c.prefix)
+	step := c.createProcess(name, container)
+
+	stage := new(backend.Stage)
+	stage.Name = name
+	stage.Alias = "restore_cache"
+	stage.Steps = append(stage.Steps, step)
+
+	ir.Stages = append(ir.Stages, stage)
+}
+
+func (c *Compiler) setupCacheRebuild(conf *yaml.Config, ir *backend.Config) {
+	if c.local || len(conf.Cache) == 0 || c.metadata.Curr.Event != "push" || c.cacher == nil {
+		return
+	}
+	container := c.cacher.Rebuild(c.metadata.Repo.Name, c.metadata.Curr.Commit.Branch)
+
+	name := fmt.Sprintf("%s_rebuild_cache", c.prefix)
+	step := c.createProcess(name, container)
+
+	stage := new(backend.Stage)
+	stage.Name = name
+	stage.Alias = "rebuild_cache"
+	stage.Steps = append(stage.Steps, step)
+
+	ir.Stages = append(ir.Stages, stage)
 }

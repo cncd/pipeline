@@ -47,6 +47,37 @@ var compileCommand = cli.Command{
 			Name: "local",
 		},
 		//
+		// volume caching
+		//
+		cli.BoolFlag{
+			Name:   "volume-cache",
+			EnvVar: "CI_VOLUME_CACHE",
+		},
+		cli.StringFlag{
+			Name:   "volume-cache-base",
+			Value:  "/var/lib/drone",
+			EnvVar: "CI_VOLUME_CACHE_BASE",
+		},
+		//
+		// s3 caching
+		//
+		cli.BoolFlag{
+			Name:   "aws-cache",
+			EnvVar: "CI_AWS_CACHE",
+		},
+		cli.StringFlag{
+			Name:   "aws-bucket",
+			EnvVar: "AWS_BUCKET",
+		},
+		cli.StringFlag{
+			Name:   "aws-access-key-id",
+			EnvVar: "AWS_ACCESS_KEY_ID",
+		},
+		cli.StringFlag{
+			Name:   "aws-secret-access-key",
+			EnvVar: "AWS_SECRET_ACCESS_KEY",
+		},
+		//
 		// registry credentials
 		//
 		cli.StringFlag{
@@ -326,6 +357,20 @@ func compileAction(c *cli.Context) (err error) {
 		),
 		compiler.WithMetadata(
 			metadataFromContext(c),
+		),
+		compiler.WithOption(
+			compiler.WithVolumeCacher(
+				c.String("volume-cache-base"),
+			),
+			c.Bool("volume-cache"),
+		),
+		compiler.WithOption(
+			compiler.WithS3Cacher(
+				c.String("aws-access-key-id"),
+				c.String("aws-secret-access-key"),
+				c.String("aws-bucket"),
+			),
+			c.Bool("aws-cache"),
 		),
 	).Compile(conf)
 
