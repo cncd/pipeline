@@ -66,11 +66,11 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 		detached = true
 	}
 
-	if !detached {
+	if detached == false || len(container.Commands) != 0 {
 		workingdir = path.Join(c.base, c.path)
 	}
 
-	if !detached {
+	if detached == false {
 		paramsToEnv(container.Vargs, environment)
 	}
 
