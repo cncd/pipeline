@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/cncd/pipeline/pipeline/frontend/yaml"
-	libcompose "github.com/docker/libcompose/yaml"
 )
 
 func TestLint(t *testing.T) {
@@ -124,59 +123,5 @@ func TestLintErrors(t *testing.T) {
 		} else if lerr.Error() != test.want {
 			t.Errorf("Want error %q, got %q", test.want, lerr.Error())
 		}
-	}
-}
-
-func TestLint_isScript(t *testing.T) {
-	c := &yaml.Container{
-		Commands: libcompose.Stringorslice{
-			"go build",
-			"go test",
-		},
-	}
-	if isScript(c) != true {
-		t.Errorf("Expect isScript returns true when container has commands")
-	}
-	if isScript(new(yaml.Container)) != false {
-		t.Errorf("Expect isScript returns false when container has no commands")
-	}
-}
-
-func TestLint_isPlugin(t *testing.T) {
-	c := &yaml.Container{
-		Vargs: map[string]interface{}{
-			"foo": "bar",
-			"baz": "qux",
-		},
-	}
-	if isPlugin(c) != true {
-		t.Errorf("Expect isPlugin returns true when container has vargs")
-	}
-	if isPlugin(new(yaml.Container)) != false {
-		t.Errorf("Expect isPlugin returns false when container has no vargs")
-	}
-}
-
-func TestLint_isService(t *testing.T) {
-	c := &yaml.Container{
-		Vargs: map[string]interface{}{
-			"foo": "bar",
-			"baz": "qux",
-		},
-	}
-	if isService(c) != false {
-		t.Errorf("Expect isService returns false when container has vargs")
-	}
-	c = &yaml.Container{
-		Commands: libcompose.Stringorslice{
-			"go build",
-			"go test",
-		},
-	}
-	if isService(c) != false {
-		t.Errorf("Expect isService returns false when container has commands")
-	}
-	if isService(new(yaml.Container)) != true {
-		t.Errorf("Expect isService returns true when container has no commands, no vargs")
 	}
 }
