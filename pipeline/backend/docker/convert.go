@@ -75,6 +75,15 @@ func toHostConfig(proc *backend.Step) *container.HostConfig {
 	if len(proc.Volumes) != 0 {
 		config.Binds = proc.Volumes
 	}
+	config.Tmpfs = map[string]string{}
+	for _, path := range proc.Tmpfs {
+		if strings.Index(path, ":") == -1 {
+			config.Tmpfs[path] = ""
+			continue
+		}
+		parts := strings.Split(path, ":")
+		config.Tmpfs[parts[0]] = parts[1]
+	}
 	// if proc.OomKillDisable {
 	// 	config.OomKillDisable = &proc.OomKillDisable
 	// }
