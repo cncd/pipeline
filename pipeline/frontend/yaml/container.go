@@ -46,6 +46,7 @@ type (
 		MemSwappiness libcompose.MemStringorInt `yaml:"mem_swappiness,omitempty"`
 		Name          string                    `yaml:"name,omitempty"`
 		NetworkMode   string                    `yaml:"network_mode,omitempty"`
+		IpcMode       string                    `yaml:"ipc_mode,omitempty"`
 		Networks      libcompose.Networks       `yaml:"networks,omitempty"`
 		Privileged    bool                      `yaml:"privileged,omitempty"`
 		Pull          bool                      `yaml:"pull,omitempty"`

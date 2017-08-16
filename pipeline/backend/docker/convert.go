@@ -55,9 +55,10 @@ func toHostConfig(proc *backend.Step) *container.HostConfig {
 	// 	config.VolumesFrom = proc.VolumesFrom
 	// }
 	if len(proc.NetworkMode) != 0 {
-		config.NetworkMode = container.NetworkMode(
-			proc.NetworkMode,
-		)
+		config.NetworkMode = container.NetworkMode(proc.NetworkMode)
+	}
+	if len(proc.IpcMode) != 0 {
+		config.IpcMode = container.IpcMode(proc.IpcMode)
 	}
 	if len(proc.DNS) != 0 {
 		config.DNS = proc.DNS
