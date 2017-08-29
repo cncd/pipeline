@@ -32,6 +32,7 @@ type (
 		CPUShares     libcompose.StringorInt    `yaml:"cpu_shares,omitempty"`
 		Detached      bool                      `yaml:"detach,omitempty"`
 		Devices       []string                  `yaml:"devices,omitempty"`
+		Tmpfs         []string                  `yaml:"tmpfs,omitempty"`
 		DNS           libcompose.Stringorslice  `yaml:"dns,omitempty"`
 		DNSSearch     libcompose.Stringorslice  `yaml:"dns_search,omitempty"`
 		Entrypoint    libcompose.Command        `yaml:"entrypoint,omitempty"`

@@ -31,6 +31,7 @@ type (
 		Command      []string          `json:"command,omitempty"`
 		ExtraHosts   []string          `json:"extra_hosts,omitempty"`
 		Volumes      []string          `json:"volumes,omitempty"`
+		Tmpfs        []string          `json:"tmpfs,omitempty"`
 		Devices      []string          `json:"devices,omitempty"`
 		Networks     []Conn            `json:"networks,omitempty"`
 		DNS          []string          `json:"dns,omitempty"`

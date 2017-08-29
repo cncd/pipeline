@@ -133,5 +133,8 @@ func (l *Linter) lintTrusted(c *yaml.Container) error {
 	if c.Volumes.Volumes != nil && len(c.Volumes.Volumes) != 0 {
 		return fmt.Errorf("Insufficient privileges to use volumes")
 	}
+	if len(c.Tmpfs) != 0 {
+		return fmt.Errorf("Insufficient privileges to use tmpfs")
+	}
 	return nil
 }

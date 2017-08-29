@@ -58,6 +58,8 @@ ulimits:
   nofile:
     soft: 20000
     hard: 40000
+tmpfs:
+  - /var/lib/test
 when:
   branch: master
 `)
@@ -99,6 +101,7 @@ func TestUnmarshalContainer(t *testing.T) {
 		Pull:        true,
 		Privileged:  true,
 		ShmSize:     libcompose.MemStringorInt(1024),
+		Tmpfs:       libcompose.Stringorslice{"/var/lib/test"},
 		Ulimits: libcompose.Ulimits{
 			Elements: []libcompose.Ulimit{
 				libcompose.NewUlimit("nofile", 20000, 40000),
