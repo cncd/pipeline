@@ -311,6 +311,17 @@ func TestConstraints(t *testing.T) {
 			with: frontend.Metadata{Repo: frontend.Repo{Name: "drone/drone"}},
 			want: false,
 		},
+		// ref constraint
+		{
+			conf: "{ ref: refs/tags/* }",
+			with: frontend.Metadata{Curr: frontend.Build{Commit: frontend.Commit{Ref: "refs/tags/v1.0.0"}}},
+			want: true,
+		},
+		{
+			conf: "{ ref: refs/tags/* }",
+			with: frontend.Metadata{Curr: frontend.Build{Commit: frontend.Commit{Ref: "refs/heads/master"}}},
+			want: false,
+		},
 		// platform constraint
 		{
 			conf: "{ platform: linux/amd64 }",
