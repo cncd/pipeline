@@ -333,6 +333,17 @@ func TestConstraints(t *testing.T) {
 			with: frontend.Metadata{Sys: frontend.System{Arch: "windows/amd64"}},
 			want: false,
 		},
+		// instance constraint
+		{
+			conf: "{ instance: drone.io }",
+			with: frontend.Metadata{Sys: frontend.System{Host: "drone.io"}},
+			want: true,
+		},
+		{
+			conf: "{ instance: drone.io }",
+			with: frontend.Metadata{Sys: frontend.System{Host: "beta.drone.io"}},
+			want: false,
+		},
 	}
 	for _, test := range testdata {
 		c := parseConstraints(test.conf)
