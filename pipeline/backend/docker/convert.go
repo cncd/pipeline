@@ -82,7 +82,7 @@ func toHostConfig(proc *backend.Step) *container.HostConfig {
 			config.Tmpfs[path] = ""
 			continue
 		}
-		parts := strings.Split(path, ":")
+		parts := strings.SplitN(path, ":", 1)
 		config.Tmpfs[parts[0]] = parts[1]
 	}
 	// if proc.OomKillDisable {
@@ -97,7 +97,7 @@ func toHostConfig(proc *backend.Step) *container.HostConfig {
 func toVol(paths []string) map[string]struct{} {
 	set := map[string]struct{}{}
 	for _, path := range paths {
-		parts := strings.Split(path, ":")
+		parts := strings.SplitN(path, ":", 1)
 		if len(parts) < 2 {
 			continue
 		}
@@ -121,7 +121,7 @@ func toEnv(env map[string]string) []string {
 func toDev(paths []string) []container.DeviceMapping {
 	var devices []container.DeviceMapping
 	for _, path := range paths {
-		parts := strings.Split(path, ":")
+		parts := strings.SplitN(path, ":", 1)
 		if len(parts) < 2 {
 			continue
 		}
