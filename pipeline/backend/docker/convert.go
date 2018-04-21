@@ -3,6 +3,7 @@ package docker
 import (
 	"encoding/base64"
 	"encoding/json"
+	"regexp"
 	"strings"
 
 	"github.com/cncd/pipeline/pipeline/backend"
@@ -82,9 +83,9 @@ func toHostConfig(proc *backend.Step) *container.HostConfig {
 			config.Tmpfs[path] = ""
 			continue
 		}
-		parts := strings.SplitN(path, ":", 1)
-		if strings.HasSuffix(parts[1], ":ro") || strings.HasSuffix(parts[1], ":rw") {
-			parts[1] = parts[1][:len(parts[1])-1]
+		parts, err := splitVolumeParts(path)
+		if err != nil {
+			continue
 		}
 		config.Tmpfs[parts[0]] = parts[1]
 	}
@@ -100,12 +101,12 @@ func toHostConfig(proc *backend.Step) *container.HostConfig {
 func toVol(paths []string) map[string]struct{} {
 	set := map[string]struct{}{}
 	for _, path := range paths {
-		parts := strings.SplitN(path, ":", 1)
-		if len(parts) < 2 {
+		parts, err := splitVolumeParts(path)
+		if err != nil {
 			continue
 		}
-		if strings.HasSuffix(parts[1], ":ro") || strings.HasSuffix(parts[1], ":rw") {
-			parts[1] = parts[1][:len(parts[1])-1]
+		if len(parts) < 2 {
+			continue
 		}
 		set[parts[1]] = struct{}{}
 	}
@@ -127,7 +128,10 @@ func toEnv(env map[string]string) []string {
 func toDev(paths []string) []container.DeviceMapping {
 	var devices []container.DeviceMapping
 	for _, path := range paths {
-		parts := strings.SplitN(path, ":", 1)
+		parts, err := splitVolumeParts(path)
+		if err != nil {
+			continue
+		}
 		if len(parts) < 2 {
 			continue
 		}
@@ -151,4 +155,25 @@ func encodeAuthToBase64(authConfig backend.Auth) (string, error) {
 		return "", err
 	}
 	return base64.URLEncoding.EncodeToString(buf), nil
+}
+
+// helper function that split volume path
+func splitVolumeParts(volumeParts string) ([]string, error) {
+	pattern := `^((?:[\w]\:)?[^\:]*)\:((?:[\w]\:)?[^\:]*)(?:\:([rwom]*))?`
+	r, err := regexp.Compile(pattern)
+	if err != nil {
+		return []string{}, err
+	}
+	if r.MatchString(volumeParts) {
+		results := r.FindStringSubmatch(volumeParts)[1:]
+		cleanResults := []string{}
+		for _, item := range results {
+			if item != "" {
+				cleanResults = append(cleanResults, item)
+			}
+		}
+		return cleanResults, nil
+	} else {
+		return strings.Split(volumeParts, ":"), nil
+	}
 }
