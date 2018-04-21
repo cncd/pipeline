@@ -77,12 +77,11 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 
 	if len(container.Commands) != 0 {
 		if c.metadata.Sys.Arch == "windows/amd64" {
-			entrypoint = []string{"powershell", "-noprofile", "-noninteractive", "-command"}
+			entrypoint = []string{"powershell", "-noprofile", "-command"}
 			command = []string{"[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($Env:CI_SCRIPT)) | iex"}
 			environment["CI_SCRIPT"] = generateScriptWindows(container.Commands)
-			// use USERPROFILE
-			// environment["HOME"] = "c:\root"
-			environment["SHELL"] = "powershell.exe"
+			environment["HOME"] = "c:\root"
+			environment["SHELL"] = "cmd.exe"
 		} else {
 			entrypoint = []string{"/bin/sh", "-c"}
 			command = []string{"echo $CI_SCRIPT | base64 -d | /bin/sh -e"}

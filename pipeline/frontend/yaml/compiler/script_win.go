@@ -36,13 +36,14 @@ $netrc=[string]::Format("{0}\_netrc",$Env:USERPROFILE);
 [Environment]::SetEnvironmentVariable("CI_NETRC_PASSWORD",$null);
 [Environment]::SetEnvironmentVariable("CI_SCRIPT",$null);
 [Environment]::SetEnvironmentVariable("DRONE_NETRC_USERNAME",$null);
-[Environment]::SetEnvironmentVariable("DRONE_NETRC_PASSWORD",$null);
+[Environment]::SetEnvironmentVariable("DRONE_NETRC_PASSWORD",$null)
+&cmd /c "mkdir c:\root"
 %s
 `
 
 // traceScript is a helper script that is added to the build script
 // to trace a command.
 const traceScriptWin = `
-Write-Host '+ %s'
-%s
+Write-Output ('+ %s');
+&cmd /c "%s";
 `
