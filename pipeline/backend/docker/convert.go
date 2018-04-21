@@ -83,6 +83,9 @@ func toHostConfig(proc *backend.Step) *container.HostConfig {
 			continue
 		}
 		parts := strings.SplitN(path, ":", 1)
+		if strings.HasSuffix(parts[1], ":ro") || strings.HasSuffix(parts[1], ":rw") {
+			parts[1] = parts[1][:len(parts[1])-1]
+		}
 		config.Tmpfs[parts[0]] = parts[1]
 	}
 	// if proc.OomKillDisable {
@@ -100,6 +103,9 @@ func toVol(paths []string) map[string]struct{} {
 		parts := strings.SplitN(path, ":", 1)
 		if len(parts) < 2 {
 			continue
+		}
+		if strings.HasSuffix(parts[1], ":ro") || strings.HasSuffix(parts[1], ":rw") {
+			parts[1] = parts[1][:len(parts[1])-1]
 		}
 		set[parts[1]] = struct{}{}
 	}
@@ -124,6 +130,9 @@ func toDev(paths []string) []container.DeviceMapping {
 		parts := strings.SplitN(path, ":", 1)
 		if len(parts) < 2 {
 			continue
+		}
+		if strings.HasSuffix(parts[1], ":ro") || strings.HasSuffix(parts[1], ":rw") {
+			parts[1] = parts[1][:len(parts[1])-1]
 		}
 		devices = append(devices, container.DeviceMapping{
 			PathOnHost:        parts[0],

@@ -27,6 +27,7 @@ func generateScriptWindows(commands []string) string {
 
 // TODO empty CI_NETRC_MACHINE check
 const setupScriptWin = `
+$ErrorActionPreference = 'Stop';
 if ($Env:CI_NETRC_MACHINE) {
 $netrc=[string]::Format("{0}\_netrc",$Env:USERPROFILE);
 "machine $Env:CI_NETRC_MACHINE" >> $netrc;
