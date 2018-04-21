@@ -25,11 +25,11 @@ func generateScriptWindows(commands []string) string {
 	return base64.StdEncoding.EncodeToString([]byte(script))
 }
 
-// TODO empty CI_NETRC_MACHINE check
 const setupScriptWin = `
 $ErrorActionPreference = 'Stop';
+&cmd /c "mkdir c:\root";
 if ($Env:CI_NETRC_MACHINE) {
-$netrc=[string]::Format("{0}\_netrc",$Env:USERPROFILE);
+$netrc=[string]::Format("{0}\_netrc",$Env:HOME);
 "machine $Env:CI_NETRC_MACHINE" >> $netrc;
 "login $Env:CI_NETRC_USERNAME" >> $netrc;
 "password $Env:CI_NETRC_PASSWORD" >> $netrc;
@@ -38,7 +38,6 @@ $netrc=[string]::Format("{0}\_netrc",$Env:USERPROFILE);
 [Environment]::SetEnvironmentVariable("CI_SCRIPT",$null);
 [Environment]::SetEnvironmentVariable("DRONE_NETRC_USERNAME",$null);
 [Environment]::SetEnvironmentVariable("DRONE_NETRC_PASSWORD",$null)
-&cmd /c "mkdir c:\root"
 %s
 `
 
