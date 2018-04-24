@@ -80,7 +80,7 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 			entrypoint = []string{"powershell", "-noprofile", "-noninteractive", "-command"}
 			command = []string{"[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($Env:CI_SCRIPT)) | iex"}
 			environment["CI_SCRIPT"] = generateScriptWindows(container.Commands)
-			environment["HOME"] = "c:\root"
+			environment["HOME"] = "c:\\root"
 			environment["SHELL"] = "cmd.exe"
 		} else {
 			entrypoint = []string{"/bin/sh", "-c"}
