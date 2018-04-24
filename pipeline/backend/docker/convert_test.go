@@ -32,8 +32,33 @@ func TestSplitVolumeParts(t *testing.T) {
 			success: true,
 		},
 		{
+			from:    `Z:/:Z:/:rw`,
+			to:      []string{`Z:/`, `Z:/`, `rw`},
+			success: true,
+		},
+		{
+			from:    `Z:/git/refs:Z:/git/refs:rw`,
+			to:      []string{`Z:/git/refs`, `Z:/git/refs`, `rw`},
+			success: true,
+		},
+		{
+			from:    `Z:/git/refs:Z:/git/refs`,
+			to:      []string{`Z:/git/refs`, `Z:/git/refs`},
+			success: true,
+		},
+		{
 			from:    `/test:/test`,
 			to:      []string{`/test`, `/test`},
+			success: true,
+		},
+		{
+			from:    `test:/test`,
+			to:      []string{`test`, `/test`},
+			success: true,
+		},
+		{
+			from:    `test:test`,
+			to:      []string{`test`, `test`},
 			success: true,
 		},
 	}
