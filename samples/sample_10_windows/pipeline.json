@@ -8,7 +8,7 @@
           "name": "pipeline_clone_0",
           "alias": "git",
           "image": "plugins/git:windows",
-          "working_dir": "c:/gopath/src/github.com/drone/envsubst",
+          "working_dir": "c:\\gopath/src\\github.com\\drone\\envsubst",
           "environment": {
             "CI": "drone",
             "CI_BUILD_CREATED": "1486119586",
@@ -30,9 +30,9 @@
             "CI_SYSTEM_ARCH": "windows/amd64",
             "CI_SYSTEM_LINK": "https://github.com/cncd/pipec",
             "CI_SYSTEM_NAME": "pipec",
-            "CI_WORKSPACE": "c:/gopath/src/github.com/drone/envsubst",
+            "CI_WORKSPACE": "c:\\gopath/src\\github.com\\drone\\envsubst",
             "DRONE": "true",
-            "DRONE_ARCH": "linux/amd64",
+            "DRONE_ARCH": "windows/amd64",
             "DRONE_BRANCH": "master",
             "DRONE_BUILD_CREATED": "1486119586",
             "DRONE_BUILD_EVENT": "push",
@@ -52,11 +52,11 @@
             "DRONE_REPO_NAME": "envsubst",
             "DRONE_REPO_OWNER": "drone",
             "DRONE_REPO_SCM": "git",
-            "DRONE_WORKSPACE": "c:/gopath/src/github.com/drone/envsubst",
+            "DRONE_WORKSPACE": "c:\\gopath/src\\github.com\\drone\\envsubst",
             "PLUGIN_DEPTH": "50"
           },
           "volumes": [
-            "pipeline_default:c:/gopath/"
+            "pipeline_default:c:\\gopath"
           ],
           "networks": [
             {
@@ -79,7 +79,7 @@
           "name": "pipeline_step_0",
           "alias": "build",
           "image": "golang:1.10.1-nanoserver-sac2016",
-          "working_dir": "c:/gopath/src/github.com/drone/envsubst",
+          "working_dir": "c:\\gopath/src\\github.com\\drone\\envsubst",
           "environment": {
             "CI": "drone",
             "CI_BUILD_CREATED": "1486119586",
@@ -97,14 +97,14 @@
             "CI_REPO_LINK": "https://github.com/drone/envsubst",
             "CI_REPO_NAME": "drone/envsubst",
             "CI_REPO_REMOTE": "https://github.com/drone/envsubst.git",
-            "CI_SCRIPT": "CiRFcnJvckFjdGlvblByZWZlcmVuY2UgPSAnU3RvcCc7CiZjbWQgL2MgIm1rZGlyIGM6XHJvb3QiOwppZiAoJEVudjpDSV9ORVRSQ19NQUNISU5FKSB7CiRuZXRyYz1bc3RyaW5nXTo6Rm9ybWF0KCJ7MH1cX25ldHJjIiwkRW52OkhPTUUpOwoibWFjaGluZSAkRW52OkNJX05FVFJDX01BQ0hJTkUiID4+ICRuZXRyYzsKImxvZ2luICRFbnY6Q0lfTkVUUkNfVVNFUk5BTUUiID4+ICRuZXRyYzsKInBhc3N3b3JkICRFbnY6Q0lfTkVUUkNfUEFTU1dPUkQiID4+ICRuZXRyYzsKfTsKW0Vudmlyb25tZW50XTo6U2V0RW52aXJvbm1lbnRWYXJpYWJsZSgiQ0lfTkVUUkNfUEFTU1dPUkQiLCRudWxsKTsKW0Vudmlyb25tZW50XTo6U2V0RW52aXJvbm1lbnRWYXJpYWJsZSgiQ0lfU0NSSVBUIiwkbnVsbCk7CltFbnZpcm9ubWVudF06OlNldEVudmlyb25tZW50VmFyaWFibGUoIkRST05FX05FVFJDX1VTRVJOQU1FIiwkbnVsbCk7CltFbnZpcm9ubWVudF06OlNldEVudmlyb25tZW50VmFyaWFibGUoIkRST05FX05FVFJDX1BBU1NXT1JEIiwkbnVsbCk7CgpXcml0ZS1PdXRwdXQgKCcrICJnbyBnZXQgLXQgLi8uLi4iJyk7ICBbQ29uc29sZV06Ok91dC5GbHVzaCgpCiYgZ28gZ2V0IC10IC4vLi4uOyBpZiAoJExBU1RFWElUQ09ERSAtbmUgMCkge2V4aXQgJExBU1RFWElUQ09ERX0KCldyaXRlLU91dHB1dCAoJysgImdvIGJ1aWxkIicpOyAgW0NvbnNvbGVdOjpPdXQuRmx1c2goKQomIGdvIGJ1aWxkOyBpZiAoJExBU1RFWElUQ09ERSAtbmUgMCkge2V4aXQgJExBU1RFWElUQ09ERX0KCldyaXRlLU91dHB1dCAoJysgImdvIHRlc3QgLXYiJyk7ICBbQ29uc29sZV06Ok91dC5GbHVzaCgpCiYgZ28gdGVzdCAtdjsgaWYgKCRMQVNURVhJVENPREUgLW5lIDApIHtleGl0ICRMQVNURVhJVENPREV9Cgo=",
+            "CI_SCRIPT": "CiRFcnJvckFjdGlvblByZWZlcmVuY2UgPSAnU3RvcCc7CiZjbWQgL2MgIm1rZGlyIGM6XHJvb3QiOwppZiAoJEVudjpDSV9ORVRSQ19NQUNISU5FKSB7CiRuZXRyYz1bc3RyaW5nXTo6Rm9ybWF0KCJ7MH1cX25ldHJjIiwkRW52OkhPTUUpOwoibWFjaGluZSAkRW52OkNJX05FVFJDX01BQ0hJTkUiID4+ICRuZXRyYzsKImxvZ2luICRFbnY6Q0lfTkVUUkNfVVNFUk5BTUUiID4+ICRuZXRyYzsKInBhc3N3b3JkICRFbnY6Q0lfTkVUUkNfUEFTU1dPUkQiID4+ICRuZXRyYzsKfTsKW0Vudmlyb25tZW50XTo6U2V0RW52aXJvbm1lbnRWYXJpYWJsZSgiQ0lfTkVUUkNfUEFTU1dPUkQiLCRudWxsKTsKW0Vudmlyb25tZW50XTo6U2V0RW52aXJvbm1lbnRWYXJpYWJsZSgiQ0lfU0NSSVBUIiwkbnVsbCk7CltFbnZpcm9ubWVudF06OlNldEVudmlyb25tZW50VmFyaWFibGUoIkRST05FX05FVFJDX1VTRVJOQU1FIiwkbnVsbCk7CltFbnZpcm9ubWVudF06OlNldEVudmlyb25tZW50VmFyaWFibGUoIkRST05FX05FVFJDX1BBU1NXT1JEIiwkbnVsbCk7CgpXcml0ZS1PdXRwdXQgKCcrICJnbyBnZXQgLXQgLlxcLi4uIicpOyAgW0NvbnNvbGVdOjpPdXQuRmx1c2goKQomIGdvIGdldCAtdCAuXC4uLjsgaWYgKCRMQVNURVhJVENPREUgLW5lIDApIHtleGl0ICRMQVNURVhJVENPREV9CgpXcml0ZS1PdXRwdXQgKCcrICJnbyBidWlsZCInKTsgIFtDb25zb2xlXTo6T3V0LkZsdXNoKCkKJiBnbyBidWlsZDsgaWYgKCRMQVNURVhJVENPREUgLW5lIDApIHtleGl0ICRMQVNURVhJVENPREV9CgpXcml0ZS1PdXRwdXQgKCcrICJnbyB0ZXN0IC12IicpOyAgW0NvbnNvbGVdOjpPdXQuRmx1c2goKQomIGdvIHRlc3QgLXY7IGlmICgkTEFTVEVYSVRDT0RFIC1uZSAwKSB7ZXhpdCAkTEFTVEVYSVRDT0RFfQoK",
             "CI_SYSTEM": "pipec",
             "CI_SYSTEM_ARCH": "windows/amd64",
             "CI_SYSTEM_LINK": "https://github.com/cncd/pipec",
             "CI_SYSTEM_NAME": "pipec",
-            "CI_WORKSPACE": "c:/gopath/src/github.com/drone/envsubst",
+            "CI_WORKSPACE": "c:\\gopath/src\\github.com\\drone\\envsubst",
             "DRONE": "true",
-            "DRONE_ARCH": "linux/amd64",
+            "DRONE_ARCH": "windows/amd64",
             "DRONE_BRANCH": "master",
             "DRONE_BUILD_CREATED": "1486119586",
             "DRONE_BUILD_EVENT": "push",
@@ -124,7 +124,7 @@
             "DRONE_REPO_NAME": "envsubst",
             "DRONE_REPO_OWNER": "drone",
             "DRONE_REPO_SCM": "git",
-            "DRONE_WORKSPACE": "c:/gopath/src/github.com/drone/envsubst",
+            "DRONE_WORKSPACE": "c:\\gopath/src\\github.com\\drone\\envsubst",
             "HOME": "c:\\root",
             "SHELL": "powershell.exe"
           },
@@ -138,7 +138,7 @@
             "[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($Env:CI_SCRIPT)) | iex"
           ],
           "volumes": [
-            "pipeline_default:c:/gopath/"
+            "pipeline_default:c:\\gopath"
           ],
           "networks": [
             {

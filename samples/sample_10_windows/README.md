@@ -1,7 +1,7 @@
 Compile the yaml to the intermediate representation:
 
 ```
-pipec compile
+pipec compile --system-arch windows/amd64
 ```
 
 Execute the intermediate representation:
