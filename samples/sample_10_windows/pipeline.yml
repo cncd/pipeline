@@ -1,3 +1,5 @@
+platform: windows/amd64
+
 workspace:
   base: c:/gopath/
   path: src/github.com/drone/envsubst
